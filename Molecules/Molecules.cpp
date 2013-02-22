@@ -61,14 +61,11 @@ int Settings(HWND hwndParent)
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
 
-	//CSettingsDlg dlg;
 	CSettingsSheet dlg;
 	int nRet = 0;
 
 	if(hwndParent) 
-	{
 		dlg.DoModal(hwndParent);
-	} 
 	else
 	{
 		if(dlg.Create(NULL) == NULL)
@@ -85,6 +82,7 @@ int Settings(HWND hwndParent)
   return nRet;
 }
 
+enum ECallReason { eRun, eSettings, ePreview };
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
 {
@@ -102,8 +100,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	hRes = _Module.Init(NULL, hInstance);
 	ATLASSERT(SUCCEEDED(hRes));
 
-	// to powinno zalatwic problem z uruchamianiem kilku instancji na raz
-	// moj sterownik do nvidii czasem reaguje na to crashem.
+	// don't allow multiple instances, wait for previous to terminate
 	HANDLE mutex = ::CreateMutex(NULL, TRUE, "MoleculesInitMTX");
 	if(mutex && ::GetLastError() == ERROR_ALREADY_EXISTS)
 	{
@@ -116,8 +113,8 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 		}
 	}
 
-	// ustalamy polozenie binarki, po czym ustawiamy jako biezacy katalog (i dysk)
-	// ignoruje w ten sposob katalog roboczy narzucony przez srodowisko
+	// find out where our binary (.scr) is located
+	// this is used to locate molecules folder later
 	TCHAR *mod = new TCHAR[MAX_PATH];
 	::GetModuleFileName(NULL, mod, MAX_PATH-1);
 	*(_tcsrchr(mod, '\\')+1) = '\0';
@@ -133,50 +130,53 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	int nRet = 0;
   TCHAR szTokens[] = _T("-/");
-  bool bRun = false;
-  bool bPreview = false;
   HWND hwndParent = NULL;
 
+	// check reason for a call
+	ECallReason cr = eRun;
   LPCTSTR lpszToken = _Module.FindOneOf(::GetCommandLine(), szTokens);
   while(lpszToken != NULL)
   {
     if(_tcsnicmp(lpszToken, _T("c"), 1) == 0)
     {
 			// control panel - settings
-      bRun = bPreview = false;
+			cr = eSettings;
       hwndParent = GetForegroundWindow();
     }
     else if(_tcsnicmp(lpszToken, _T("p "), 2) == 0)
     {
 			// preview
-      bPreview = true;
-      bRun = false;
+			cr = eSettings;
       int n = 0;
       _stscanf_s(lpszToken+1, _T("%i%n"), &hwndParent, &n);
       lpszToken += n+1;
     }
     else if(_tcsnicmp(lpszToken, _T("s"), 1) == 0)
     {
-			// normal screen save
-      bPreview = false;
-      bRun = true;
+			// normal screen saver mode
+			cr = eRun;
     }
     lpszToken = _Module.FindOneOf(lpszToken, szTokens);
   }
 
-	if(bRun)
-		nRet = Run(lpstrCmdLine, nCmdShow);
-	else if(bPreview)
-		nRet = Preview(hwndParent);
-	else
+	switch (cr)
 	{
+	default:
+	case eRun:
+		nRet = Run(lpstrCmdLine, nCmdShow);
+		break;
+	case ePreview:
+		nRet = Preview(hwndParent);
+		break;
+	case eSettings:
 #ifdef DEBUG
+		// in debug builds run saver instead of settings when launched
 		nRet = Run(lpstrCmdLine, nCmdShow);
 #else
 		nRet = Settings(hwndParent);
 #endif
+		break;
 	}
-	//MessageBox(NULL, "SETTINGS NOT IMPLEMENTED YET ;-)", "Molecules", MB_OK | MB_ICONINFORMATION);
 
 	_Module.Term();
 	::CoUninitialize();

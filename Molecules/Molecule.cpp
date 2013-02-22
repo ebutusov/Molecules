@@ -9,7 +9,7 @@
 //#define USE_GLU
 
 void
-DrawSphereM(GLfloat x, GLfloat y, GLfloat z, GLfloat diameter, BOOL wireframe, GLfloat scale)
+DrawSphereM(GLfloat x, GLfloat y, GLfloat z, GLfloat diameter, bool wireframe, GLfloat scale)
 {
 	glPushMatrix();
 	glTranslatef(x, y, z);
@@ -85,15 +85,10 @@ CMolecule::CMolecule(void)
 
 CMolecule::~CMolecule(void)
 {
-	POSITION pos = m_Atoms.GetStartPosition();
-	int num;
-	AtomPtr atom;
-	while(pos != NULL)
-	{
-		num = m_Atoms.GetKeyAt(pos);
-		atom = m_Atoms.GetNextValue(pos);
+	FOREACH_ATOM(atom)
 		delete atom;
-	}
+	END_FOREACH_ATOM()
+	
 	m_Atoms.RemoveAll();
 	
 	for(unsigned int i=0;i<m_AtomLinks.GetCount();i++)
@@ -134,7 +129,7 @@ CMolecule::GetMaxDimension()
 }
 
 void
-CMolecule::EnableLinks(BOOL enable)
+CMolecule::EnableLinks(bool enable)
 {
 	m_bDrawLinks = enable;
 	if(enable)
@@ -142,7 +137,7 @@ CMolecule::EnableLinks(BOOL enable)
 }
 
 void
-CMolecule::EnableWire(BOOL enable)
+CMolecule::EnableWire(bool enable)
 {
 	m_bWireMode = enable;
 }
@@ -174,7 +169,22 @@ CMolecule::InitImplosion(GLfloat step, GLfloat factor)
 void
 CMolecule::PutLink(int from, int to)
 {
-	if(m_AtomLinks.GetCount() == 0)
+	// we need to check for duplicates and update multi links
+	bool already_defined = FALSE;
+	for(size_t i=0; i<m_AtomLinks.GetCount(); i++)
+	{
+		ATOMLINKPTR link = m_AtomLinks.GetAt(i);
+		if((link->from == from && link->to == to))
+		{
+			link->strength++;
+			already_defined = TRUE;
+			break; // multi link between two atoms
+		}
+		if(link->to == from && link->from == to)
+			already_defined = TRUE;	// reverse link already exists, don't add
+	}
+	
+	if(!already_defined)
 	{
 		ATOMLINKPTR alink = new ATOMLINK();
 		alink->from = from;
@@ -184,31 +194,7 @@ CMolecule::PutLink(int from, int to)
 													// strenght will be increased
 		m_AtomLinks.Add(alink);
 	}
-	else
-	{
-		// we need to check for duplicates before inserting this link
-		BOOL already_defined = FALSE;
-		for(int i=0; i<m_AtomLinks.GetCount(); i++)
-		{
-			ATOMLINKPTR link = m_AtomLinks.GetAt(i);
-			if((link->from == from && link->to == to))
-			{
-				link->strength++;
-				already_defined = TRUE;
-				break; // multi link between two atoms
-			}
-			if(link->to == from && link->from == to)
-				already_defined = TRUE;	// reverse link already exists, don't add
-		}
-		if(!already_defined)
-		{
-			ATOMLINKPTR alink = new ATOMLINK();
-			alink->from = from;
-			alink->to = to;
-			alink->strength = 1;
-			m_AtomLinks.Add(alink);
-		}
-	}
+	//}
 }
 
 void
@@ -371,10 +357,10 @@ CMolecule::CreateAtom(GLfloat x, GLfloat y, GLfloat z, TCHAR *atomName, int numb
 	m_Atoms.SetAt(number, a);
 }
 
-BOOL
+bool
 CMolecule::DoImpExplode()
 {
-	BOOL all_atoms_ready = TRUE;
+	bool all_atoms_ready = TRUE;
 	FOREACH_ATOM(atom)
 		if(atom->GetMoveStatus())
 		{
@@ -468,7 +454,7 @@ CMolecule::DrawLinks()
 {
 	// set default link color
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, LINKCOLOR);
-	for(int i=0;i<m_AtomLinks.GetCount(); i++)
+	for(size_t i=0;i<m_AtomLinks.GetCount(); i++)
 	{
 		ATOMLINKPTR link = m_AtomLinks.GetAt(i);
 		CAtom *fromAtom;

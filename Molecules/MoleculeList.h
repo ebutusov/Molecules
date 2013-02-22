@@ -14,7 +14,7 @@ public:
 	LPCTSTR GetPrevMolecule();
 	virtual ~CMoleculeList(void);
 private:
-	int m_nCurrentPosition;
+	size_t m_nCurrentPosition;
 	void ProcessDir(LPCTSTR dir);
 	CAtlArray<LPCTSTR> m_Molecules;
 };

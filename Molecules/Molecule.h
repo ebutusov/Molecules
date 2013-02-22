@@ -12,8 +12,8 @@ public:
 	void Draw();
 
 	void PutLink(int from, int to);
-	void EnableLinks(BOOL enable);
-	void EnableWire(BOOL enable);
+	void EnableLinks(bool enable);
+	void EnableWire(bool enable);
 
 	void SetDescription(LPTSTR desc);
 	int GetAtomsCount();
@@ -25,15 +25,15 @@ public:
 	void InitExplosion(GLfloat step = 1.0f, GLfloat dist_factor = 2.0f);
 	void InitImplosion(GLfloat step = 1.0f, GLfloat dist_factor = 2.0f);
 
-	BOOL DoImpExplode();
+	bool DoImpExplode();
 	typedef enum DrawingMode { dmNormal, dmExplode, dmImplode };
 
 	virtual ~CMolecule(void);
 
 protected:
 	DrawingMode m_DrawMode;
-	BOOL m_bDrawLinks;
-	BOOL m_bWireMode;
+	bool m_bDrawLinks;
+	bool m_bWireMode;
 	static GLfloat LINKCOLOR[4];
 	LPTSTR m_Description;
 	GLfloat TRANSLATIONS[3];
@@ -42,7 +42,7 @@ protected:
 	GLfloat m_ExplosionStep;
 	void RescaleAtoms();
 	GLuint m_dl;
-	BOOL m_bFromDL;
+	bool m_bFromDL;
 
 	void DrawLinks();
 	void DrawAtoms();

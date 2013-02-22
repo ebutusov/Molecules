@@ -127,7 +127,7 @@ void
 CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
 {
   int i;
-  GLfloat step = M_PI * 2 / faces;
+  GLfloat step = (GLfloat)M_PI * 2.0f / faces;
   GLfloat s2 = step/2;
   GLfloat th;
   GLfloat x, y, x0=0, y0=0;
@@ -181,9 +181,9 @@ CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
     for (z = 0; z <= 1; z++)
       {
         glFrontFace(z == 0 ? GL_CCW : GL_CW);
-        glNormal3f(0, (z == 0 ? -1 : 1), 0);
+        glNormal3f(0.0f, (z == 0 ? -1.0f : 1.0f), 0.0f);
         glBegin(wire ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
-        if (! wire) glVertex3f(0, z, 0);
+        if (! wire) glVertex3f(0.0f, z, 0.0f);
         for (i = 0, th = 0; i <= faces; i++)
           {
             GLfloat x = cos (th);

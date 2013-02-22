@@ -22,7 +22,7 @@ CMoleculeList::LoadList()
 void
 CMoleculeList::ClearList()
 {
-	for(int i=0;i<m_Molecules.GetCount();i++)
+	for(size_t i=0;i<m_Molecules.GetCount();i++)
 		delete m_Molecules.GetAt(i);
 
 	m_Molecules.RemoveAll();

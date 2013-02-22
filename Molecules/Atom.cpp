@@ -194,8 +194,8 @@ CAtom::LoadDefaults()
 	}
 	if(!found)
 	{
-		_tcsncpy(m_Name, "UNK", 3);
-		_tcsncpy(m_FullName, "UNKNOWN", 7);
+		_tcsncpy_s(m_Name, 4, "UNK", 3);
+		_tcsncpy_s(m_FullName, 20, "UNKNOWN", 7);
 		this->m_Size = 1.0f;
 		this->m_ColorR = 0.0f;
 		this->m_ColorG = 1.0f;
