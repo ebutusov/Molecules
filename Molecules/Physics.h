@@ -8,6 +8,7 @@ public:
 
 	void Init(GLfloat xmax, GLfloat ymax, GLfloat zmax);
 	void DoFreeRotation();
+	void DoFreeRotation2(DWORD delta);
 	void ResetState();
 	void GetRotation(GLfloat &xang, GLfloat &yang, GLfloat &zang);
 

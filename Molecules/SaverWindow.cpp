@@ -273,15 +273,9 @@ CSaverWindow::RunSaver()
   return ret;
 }
 
-void
-CSaverWindow::DoMotion()
-{
-	
-}
-
 LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	static DWORD last_move = 0;
+	static DWORD last_move = GetTickCount();
 	
   if(wParam == TIMER_FPS)
 	{
@@ -297,8 +291,8 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				delete m_pMolecule;
 				m_pMolecule = NULL;
 			}
-			m_Twister.DoFreeRotation();
-			last_move = GetTickCount();
+			//m_Twister.DoFreeRotation();
+			//last_move = GetTickCount();
 			RedrawWindow();
 			return 0;
 		}
@@ -314,11 +308,12 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	else if(wParam == TIMER_MOVE)
 	{
 		DWORD tick = GetTickCount();
+		DWORD delta = tick - last_move;
 		//m_Twister.DoFreeRotation();
 		//RedrawWindow();
 		if(GetTickCount() - last_move >= m_Settings.dMoveDelay)
 		{		
-			m_Twister.DoFreeRotation();
+			m_Twister.DoFreeRotation2(delta);
 			last_move = GetTickCount();
 		}
 		else
@@ -474,9 +469,9 @@ void CSaverWindow::OnRender()
       glPushMatrix();
         glScalef(1.0f, -1.0, 1.0f); // scale y axis  
         glTranslatef(0.0f, dim/2+0.8f, 0.0f);
-        glRotatef(y, 0.0f, 1.0f, 0.0f);	
+        glRotatef(z, 0.0f, 0.0f, 1.0f);
+				glRotatef(y, 0.0f, 1.0f, 0.0f);	
 	      glRotatef(x, 1.0f, 0.0f, 0.0f);
-	      glRotatef(z, 0.0f, 0.0f, 1.0f);
 	      glTranslatef(tx, ty, tz);
         m_pMolecule->Draw();
       glPopMatrix();
@@ -497,17 +492,22 @@ void CSaverWindow::OnRender()
     }
 
     // xxx dlaczego w ten sposob (translate - rotate - translate) ???
-    glTranslatef(0.0f, dim/2+0.8f, 0.0f);
+		/* glTranslatef(0.0f, dim/2+0.8f, 0.0f);
     glRotatef(y, 0.0f, 1.0f, 0.0f);	
 		glRotatef(x, 1.0f, 0.0f, 0.0f);
 		glRotatef(z, 0.0f, 0.0f, 1.0f);
-		glTranslatef(tx, ty, tz);
-    m_pMolecule->Draw();
+		glTranslatef(tx, ty, tz);*/
+		glTranslatef(0.0f, dim/2+0.8f, 0.0f);	// rotate aroud this origin ...
+		glRotatef(z, 0.0f, 0.0f, 1.0f);				// with these angles ...
+		glRotatef(y, 0.0f, 1.0f, 0.0f);	
+		glRotatef(x, 1.0f, 0.0f, 0.0f);
+		glTranslatef(tx, ty, tz);							// object placed here
+    
+		m_pMolecule->Draw();
 
 		glColor3f(0.1f, 1.0f, 0.2f);
 		if(m_bShowDesc && !m_bScreenTooSmall)
 		{
-      //CString legend("\nLegend:\ngray - carbon\nred - oxygen");
 			RECT rect;
 			this->GetClientRect(&rect);
 			CString desc;
@@ -520,7 +520,6 @@ void CSaverWindow::OnRender()
 				desc.Format(_T("%s\nFPS: %3d FTIME: %3d [ms]"), 
 					m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription(), m_nFps, m_dFrameTime);
 			}
-      //desc += legend;
 			CGLDrawHelper::DrawString(font_base, rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
 				(LPTSTR)(LPCTSTR)desc, m_lTextHeight);
 		}   

@@ -41,6 +41,35 @@ CTwister::GetRotation(GLfloat &xang, GLfloat &yang, GLfloat &zang)
 }
 
 void
+CTwister::DoFreeRotation2(DWORD delta)
+{
+	float speed = 180.0f; // per second
+	float acc = 0.01f; // acceleration
+
+	speed *= (float)delta/1000; 
+
+	// normalization
+	m_fXAngle += speed;
+	m_fYAngle += speed;
+	//m_fZAngle += speed;
+
+	/*if(m_fXAngle > 360.0f)
+		m_fXAngle = m_fXAngle - 360.0f;
+	else if(m_fXAngle < -360.0f)
+		m_fXAngle = m_fXAngle+360.0f;
+	m_fYAngle += speed;
+	if(m_fYAngle > 360.0f)
+		m_fYAngle = m_fYAngle - 360.0f;
+	else if(m_fYAngle < -360.0f)
+		m_fYAngle = m_fYAngle+ 360.0f;
+	m_fZAngle += speed;
+	if(m_fZAngle > 360.0f)
+		m_fZAngle = m_fZAngle - 360.0f;
+	else if(m_fZAngle < -360.0f)
+		m_fZAngle = m_fZAngle+360.0f;*/
+}
+
+void
 CTwister::DoFreeRotation()
 {
 	m_fXAcc = (m_fXSpeedMax/100)*((rand()%5)+1);
@@ -69,7 +98,7 @@ CTwister::DoFreeRotation()
 		m_fZSpeed += m_zdir*m_fZAcc;
 	}
 
-		m_fXAngle += m_fXSpeed;
+	m_fXAngle += m_fXSpeed;
 	if(m_fXAngle > 360.0f)
 		m_fXAngle = m_fXAngle - 360.0f;
 	else if(m_fXAngle < -360.0f)

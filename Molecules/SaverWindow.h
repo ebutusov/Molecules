@@ -36,7 +36,6 @@ private:
 	CTwister m_Twister;
 	BOOL LoadMolecule();
 	BOOL LoadPreferences();
-	void DoMotion();
   void DrawFloor();
 
 	typedef enum Oper { opRender, opZoomIn, opZoomOut, opBlank, opBuilding };
