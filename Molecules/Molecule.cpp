@@ -91,12 +91,10 @@ CMolecule::~CMolecule(void)
 	
 	m_Atoms.RemoveAll();
 	
-	for(unsigned int i=0;i<m_AtomLinks.GetCount();i++)
-	{
-		ATOMLINKPTR link = m_AtomLinks.GetAt(i);
-		delete link;
-	}
-	m_AtomLinks.RemoveAll();
+	for(auto i = m_AtomLinks.begin();i != m_AtomLinks.end(); ++i)
+		delete (*i);
+
+	m_AtomLinks.clear();
 	if(m_Description)
 		delete [] m_Description;
 }
@@ -171,9 +169,10 @@ CMolecule::PutLink(int from, int to)
 {
 	// we need to check for duplicates and update multi links
 	bool already_defined = FALSE;
-	for(size_t i=0; i<m_AtomLinks.GetCount(); i++)
+
+	for(auto i = m_AtomLinks.begin();i != m_AtomLinks.end(); ++i)
 	{
-		ATOMLINKPTR link = m_AtomLinks.GetAt(i);
+		ATOMLINKPTR link = *i;
 		if((link->from == from && link->to == to))
 		{
 			link->strength++;
@@ -192,7 +191,7 @@ CMolecule::PutLink(int from, int to)
 		alink->strength = 1;	// one link, normal strength
 													// if there will be more links between those two atoms,
 													// strenght will be increased
-		m_AtomLinks.Add(alink);
+		m_AtomLinks.push_back(alink);
 	}
 	//}
 }
@@ -453,9 +452,9 @@ CMolecule::DrawLinks()
 {
 	// set default link color
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, LINKCOLOR);
-	for(size_t i=0;i<m_AtomLinks.GetCount(); i++)
+	for (auto i = std::begin(m_AtomLinks);i != std::end(m_AtomLinks); ++i)
 	{
-		ATOMLINKPTR link = m_AtomLinks.GetAt(i);
+		ATOMLINKPTR link = *i;
 		CAtom *fromAtom;
 		m_Atoms.Lookup(link->from, fromAtom);
 		CAtom *toAtom;

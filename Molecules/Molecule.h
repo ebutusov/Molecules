@@ -3,6 +3,7 @@
 #include "stdafx.h"
 //#include <atlopengl.h> in stdafx.
 #include "Atom.h"
+#include <vector>
 
 class CMolecule
 {
@@ -58,5 +59,5 @@ protected:
 	} ATOMLINK;
 	
 	typedef ATOMLINK* ATOMLINKPTR;
-	CAtlArray<ATOMLINKPTR> m_AtomLinks;
+	std::vector<ATOMLINKPTR> m_AtomLinks;
 };
