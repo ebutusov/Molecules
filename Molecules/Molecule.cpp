@@ -201,7 +201,6 @@ void
 CMolecule::RescaleAtoms()
 {
 	FOREACH_ATOM(atom)
-		//num = m_Atoms.GetKeyAt(pos);
 		GLfloat bot = 0.4f;
     GLfloat top = 0.6f;
     GLfloat min = 1.17f;
@@ -478,9 +477,6 @@ CMolecule::Draw()
 	// apply scaling and translations, if needed
 	//glTranslatef(TRANSLATIONS[0], TRANSLATIONS[1], TRANSLATIONS[2]);
 	
-	//DrawAtoms();
-	//if(m_DrawMode == dmNormal && m_bDrawLinks)
-	//	DrawLinks();
 	if(m_DrawMode == dmNormal)
 	{
 		if(!m_bFromDL)
@@ -505,7 +501,7 @@ CMolecule::Draw()
 			glDeleteLists(m_dl, 1);
 			m_bFromDL = FALSE;
 		}
-		DrawAtoms();	
+		DrawAtoms();
 	}
 }
 

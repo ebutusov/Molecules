@@ -11,7 +11,6 @@ public:
 	virtual ~CMoleculeBuilder(void);
 	CMolecule* LoadFromFile(LPCTSTR filename);
 private:
-	TCHAR *m_FileBuff;
-	void BuildMolecule(CMolecule *mol);
+	void BuildMolecule(CMolecule *mol, TCHAR *filebuf);
 	void ParseLine(TCHAR *line, CMolecule *mol);
 };

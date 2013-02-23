@@ -36,6 +36,10 @@ public:
 	virtual ~CAtom(void);
 private:
 
+	// non copyable, non assignable
+	CAtom(CAtom &other) {};
+	CAtom& operator=(CAtom &other) { return *this; }
+
 	TCHAR m_Name[4];
 	TCHAR m_FullName[20];
 

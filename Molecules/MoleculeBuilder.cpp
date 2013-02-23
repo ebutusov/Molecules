@@ -1,6 +1,7 @@
 #include "StdAfx.h"
 #include "MoleculeBuilder.h"
 #include "atlwfile.h"
+#include <memory>
 
 CMoleculeBuilder::CMoleculeBuilder(void)
 {
@@ -20,32 +21,33 @@ CMoleculeBuilder::LoadFromFile(LPCTSTR filename)
 		return NULL;
 
 	DWORD size = f.GetSize();
-	m_FileBuff = new TCHAR[size+1];
-	f.Read(m_FileBuff, size);
-	m_FileBuff[size] = '\0';
+	if (size == 0) return NULL;
+
+	std::unique_ptr<TCHAR[]> filebuff(new TCHAR[size+1]);
+	TCHAR *fb = filebuff.get();
+	f.Read(fb, size);
+	fb[size] = '\0';
 	f.Close();
 	CMolecule *mol = new CMolecule();
-	BuildMolecule(mol);
+	BuildMolecule(mol, fb);
 	mol->CalculateBoundingBox();
-	delete [] m_FileBuff;
 	return mol->GetAtomsCount()>0 ? mol : NULL;
 }
 
 void
-CMoleculeBuilder::BuildMolecule(CMolecule *mol)
+CMoleculeBuilder::BuildMolecule(CMolecule *mol, TCHAR *filebuf)
 {
 	TCHAR delims[] = "\n";
 	TCHAR *context;
-	LPSTR sp = _tcstok_s(m_FileBuff, delims, &context);
+	LPSTR sp = _tcstok_s(filebuf, delims, &context);
 	while(sp != NULL)
 	{
 		int len = _tcslen(sp);
-		TCHAR *lineBuff = new TCHAR[len+1];
-		TCHAR *bufptr = lineBuff;
-		_tcsncpy_s(lineBuff, len+1, sp, len);
-		ParseLine(lineBuff, mol);
+		std::unique_ptr<TCHAR[]> lineBuff(new TCHAR[len+1]);
+		TCHAR *bufptr = lineBuff.get();
+		_tcsncpy_s(lineBuff.get(), len+1, sp, len);
+		ParseLine(lineBuff.get(), mol);
 		sp = _tcstok_s(NULL, delims, &context);
-		delete [] bufptr;
 	}
 }
 
@@ -56,29 +58,27 @@ CMoleculeBuilder::ParseLine(TCHAR *line, CMolecule *mol)
 	if(len < 6)
 		return;
 
+	int scanned = 0;
+
 	if(!_tcsncicmp("HETATM", line, 6) || !_tcsncicmp("ATOM", line, 4))
 	{
 		// got atom entry
 		int number;
-		TCHAR *name_wrk = new TCHAR[4];
-		TCHAR *name = new TCHAR[4];
-		if(1 != sscanf_s (line+7, " %d ", &number))
-            MessageBox(NULL, "PARSE ERROR", "ERROR", MB_OK);
+		TCHAR name_wrk[4], name[4];
+
+		scanned = _stscanf_s(line+7, " %d ", &number);
+		ATLASSERT(scanned == 1);
 		_tcsncpy_s(name_wrk, 4, line+12, 3);
 		name_wrk[3] = '\0';
-		TCHAR *safe = name;
+		TCHAR *it = name;
 		for(int i=0;i<3;i++)
 			if(!isspace(name_wrk[i]) && !isdigit(name_wrk[i]))
-				*(name++) = name_wrk[i];
-		*name = '\0';
-		name = safe;
+				*(it++) = name_wrk[i];
+		*it = '\0';
 		GLfloat x = -999, y = -999, z = -999;
-		if(3 != sscanf_s (line + 31, " %f %f %f ", &x, &y, &z))
-			MessageBox(NULL, "COORD PARSE ERROR", "ERROR", MB_OK);
-
+		scanned = _stscanf_s (line + 31, " %f %f %f ", &x, &y, &z);
+		ATLASSERT(scanned == 3);
 		mol->CreateAtom(x, y, z, name, number);
-		delete [] name_wrk;
-		delete [] name;
 		return;
 	}
 	if(!_tcsncicmp("CONECT", line, 6))

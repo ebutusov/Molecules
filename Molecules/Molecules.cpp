@@ -8,6 +8,7 @@
 #include "SettingsDlg.h"
 #include "SettingsSheet.h"
 #include <direct.h>
+#include <memory>
 
 CAppModule _Module;
 
@@ -86,6 +87,7 @@ enum ECallReason { eRun, eSettings, ePreview };
 
 int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lpstrCmdLine, int nCmdShow)
 {
+	//MessageBox(NULL, lpstrCmdLine, "Command line", MB_OK);
 	HRESULT hRes = ::CoInitialize(NULL);
 // If you are running on NT 4.0 or higher you can use the following call instead to 
 // make the EXE free threaded. This means that calls come in on a random RPC thread.
@@ -115,9 +117,9 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	// find out where our binary (.scr) is located
 	// this is used to locate molecules folder later
-	TCHAR *mod = new TCHAR[MAX_PATH];
-	::GetModuleFileName(NULL, mod, MAX_PATH-1);
-	*(_tcsrchr(mod, '\\')+1) = '\0';
+	unique_ptr<TCHAR[]> mod(new TCHAR[MAX_PATH]);
+	::GetModuleFileName(NULL, mod.get(), MAX_PATH-1);
+	*(_tcsrchr(mod.get(), '\\')+1) = '\0';
 	TCHAR drive;
 	if(islower((int)mod[0]))
 		drive = _toupper(mod[0]);
@@ -125,28 +127,28 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 		drive = mod[0];
 	int drv = (int)drive-64;
 	_chdrive(drv);
-	_tchdir(mod);
-  delete [] mod;
+	_tchdir(mod.get());
 
 	int nRet = 0;
   TCHAR szTokens[] = _T("-/");
   HWND hwndParent = NULL;
 
 	// check reason for a call
-	ECallReason cr = eRun;
+	ECallReason cr = eSettings; // when no parameter given, show settings
   LPCTSTR lpszToken = _Module.FindOneOf(::GetCommandLine(), szTokens);
-  while(lpszToken != NULL)
+  if (lpszToken != NULL)
   {
-    if(_tcsnicmp(lpszToken, _T("c"), 1) == 0)
-    {
-			// control panel - settings
-			cr = eSettings;
-      hwndParent = GetForegroundWindow();
-    }
-    else if(_tcsnicmp(lpszToken, _T("p "), 2) == 0)
+		// XXX this flag is no longer used by windows?
+    //if(_tcsnicmp(lpszToken, _T("c"), 1) == 0)
+    //{
+			// settings (configuration dialog)
+		//	cr = eSettings;
+     // hwndParent = GetForegroundWindow();
+    //}
+    if(_tcsnicmp(lpszToken, _T("p "), 2) == 0)
     {
 			// preview
-			cr = eSettings;
+			cr = ePreview;
       int n = 0;
       _stscanf_s(lpszToken+1, _T("%i%n"), &hwndParent, &n);
       lpszToken += n+1;
@@ -156,7 +158,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 			// normal screen saver mode
 			cr = eRun;
     }
-    lpszToken = _Module.FindOneOf(lpszToken, szTokens);
+    // lpszToken = _Module.FindOneOf(lpszToken, szTokens);
   }
 
 	switch (cr)
