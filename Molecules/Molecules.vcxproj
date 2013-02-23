@@ -145,7 +145,6 @@
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
     <ClCompile Include="Atom.cpp" />
-    <ClCompile Include="File.cpp" />
     <ClCompile Include="GLDrawHelper.cpp" />
     <ClCompile Include="Helpers.cpp" />
     <ClCompile Include="Molecule.cpp" />
@@ -169,8 +168,6 @@
     <ClInclude Include="atlopengl.h" />
     <ClInclude Include="atlwfile.h" />
     <ClInclude Include="Atom.h" />
-    <ClInclude Include="Exception.h" />
-    <ClInclude Include="File.h" />
     <ClInclude Include="GLDrawHelper.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="Molecule.h" />
