@@ -70,11 +70,11 @@ DrawTubeM(GLfloat x1, GLfloat y1, GLfloat z1,
 
 GLfloat CMolecule::LINKCOLOR[4] = { 0.3f, 0.3f, 0.2f, 1.0f };
 
-CMolecule::CMolecule(void)
+CMolecule::CMolecule(void) 
+	: m_Description(_T("UNKNOWN"))
 {
 	m_bDrawLinks = FALSE;
 	m_bWireMode = FALSE;
-	m_Description = NULL;
 	m_DrawMode = dmNormal;
 	m_dl = 0;
 	m_bFromDL = FALSE;
@@ -93,23 +93,18 @@ CMolecule::~CMolecule(void)
 		delete (*i);
 
 	m_AtomLinks.clear();
-	if(m_Description)
-		delete [] m_Description;
 }
 
 void
 CMolecule::SetDescription(LPTSTR desc)
 {
-	m_Description = new TCHAR[_tcslen(desc)+1];
-	_tcsncpy_s(m_Description, _tcslen(desc)+1, desc, _tcslen(desc));
+	m_Description = desc;
 }
 
-LPTSTR
+const CString&
 CMolecule::GetDescription()
 {
-	if(m_Description)
-		return m_Description;
-	else return "UNKNOWN";
+	return m_Description;
 }
 
 int
@@ -351,7 +346,6 @@ CMolecule::CreateAtom(GLfloat x, GLfloat y, GLfloat z, TCHAR *atomName, int numb
 	CAtom *a = new CAtom(atomName);
 	a->SetCoords(x, y, z);
 	m_Atoms[number] = a;
-	//m_Atoms.SetAt(number, a);
 }
 
 bool

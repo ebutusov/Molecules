@@ -19,7 +19,7 @@ public:
 
 	void SetDescription(LPTSTR desc);
 	int GetAtomsCount();
-	LPTSTR GetDescription();
+	const CString& GetDescription();
 	GLfloat GetMaxDimension();
 	void CalculateBoundingBox();
   void GetTranslations(GLfloat &x, GLfloat &y, GLfloat &z);
@@ -37,7 +37,8 @@ protected:
 	bool m_bDrawLinks;
 	bool m_bWireMode;
 	static GLfloat LINKCOLOR[4];
-	LPTSTR m_Description;
+	CString m_Description;
+	//LPTSTR m_Description;
 	GLfloat TRANSLATIONS[3];
 	GLfloat m_Width, m_Height, m_Depth;
 	GLfloat m_Scale, m_ElementScale;
