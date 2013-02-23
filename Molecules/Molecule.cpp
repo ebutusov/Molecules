@@ -60,16 +60,13 @@ DrawTubeM(GLfloat x1, GLfloat y1, GLfloat z1,
 // MOLECULE IMPLEMENTATION
 ////////////////////////////////////////////////////////////////////////////////////////
 
-
-#define FOREACH_ATOM(x) {\
-	POSITION pos = m_Atoms.GetStartPosition(); \
-	AtomPtr x; \
-	while(pos != NULL) \
+#define FOREACH_ATOM(x) \
+	for(auto _it = m_Atoms.begin(); _it != m_Atoms.end(); ++_it) \
 	{ \
-  x = m_Atoms.GetNextValue(pos);
+		AtomPtr x; \
+		x = _it->second;
 
-#define END_FOREACH_ATOM() } }
-
+#define END_FA }
 
 GLfloat CMolecule::LINKCOLOR[4] = { 0.3f, 0.3f, 0.2f, 1.0f };
 
@@ -87,10 +84,11 @@ CMolecule::~CMolecule(void)
 {
 	FOREACH_ATOM(atom)
 		delete atom;
-	END_FOREACH_ATOM()
-	
-	m_Atoms.RemoveAll();
-	
+		_it->second = NULL;
+	END_FA
+
+	m_Atoms.clear();
+
 	for(auto i = m_AtomLinks.begin();i != m_AtomLinks.end(); ++i)
 		delete (*i);
 
@@ -117,7 +115,7 @@ CMolecule::GetDescription()
 int
 CMolecule::GetAtomsCount()
 {
-	return m_Atoms.GetCount();
+	return m_Atoms.size();
 }
 
 GLfloat
@@ -148,7 +146,7 @@ CMolecule::InitExplosion(GLfloat step, GLfloat factor)
 	FOREACH_ATOM(atom)
 		atom->SetNormalAsCurrent();
 		atom->SetMoveStatus(TRUE);
-	END_FOREACH_ATOM()
+	END_FA
 	m_DrawMode = dmExplode;
 }
 
@@ -160,7 +158,7 @@ CMolecule::InitImplosion(GLfloat step, GLfloat factor)
 	FOREACH_ATOM(atom)
 		atom->SetOutAsCurrent();
 		atom->SetMoveStatus(TRUE);
-	END_FOREACH_ATOM()
+	END_FA
 	m_DrawMode = dmImplode;
 }
 
@@ -206,7 +204,7 @@ CMolecule::RescaleAtoms()
     GLfloat max = 1.80f;
     GLfloat ratio = (atom->GetSize() - min) / (max - min);
     atom->SetScaledSize(bot + (ratio * (top - bot)));
-	END_FOREACH_ATOM()
+	END_FA
 }
 
 void
@@ -226,7 +224,7 @@ CMolecule::CalculateOutValues(GLfloat dist_factor)
 		atom->SetOutCoords(x, y, z);
 		GLfloat speed = (GLfloat)(rand()%6+3)/10;
 		atom->SetSpeed(speed);
-	END_FOREACH_ATOM()
+	END_FA
 }
 
 /// Large molecules are not always initally visible beacuse
@@ -236,7 +234,9 @@ CMolecule::CalculateOutValues(GLfloat dist_factor)
 void
 CMolecule::CalculateBoundingBox()
 {
-	if(m_Atoms.GetCount() == 0)
+	int count = m_Atoms.size();
+
+	if(count == 0)
 	{
 		for(int i=0;i<3;i++)
 			TRANSLATIONS[i] = 0.0f;
@@ -247,8 +247,7 @@ CMolecule::CalculateBoundingBox()
 	}
 
 	GLfloat x1, y1, z1, x2, y2, z2;
-	POSITION p = m_Atoms.GetStartPosition();
-	AtomPtr firstAtom = m_Atoms.GetValueAt(p);
+	AtomPtr firstAtom = m_Atoms.begin()->second;
 	x1 = x2 = firstAtom->GetX();
 	y1 = y2 = firstAtom->GetY();
 	z1 = z2 = firstAtom->GetZ();
@@ -259,7 +258,7 @@ CMolecule::CalculateBoundingBox()
     if(atom->GetX() < x1) x1 = atom->GetX();
 		if(atom->GetY() < y1) y1 = atom->GetY();
 		if(atom->GetZ() < z1) z1 = atom->GetZ();
-  END_FOREACH_ATOM()
+  END_FA
 
   if (x1 < 0)
   {
@@ -269,7 +268,7 @@ CMolecule::CalculateBoundingBox()
       atom->GetCoords(x, y, z);
       x += (-x1);
       atom->SetCoords(x, y, z);
-    END_FOREACH_ATOM()
+    END_FA
   }
 
   if (y1 < 0)
@@ -280,8 +279,8 @@ CMolecule::CalculateBoundingBox()
       atom->GetCoords(x, y, z);
       y += (-y1);
       atom->SetCoords(x, y, z);
-    END_FOREACH_ATOM()
-  }
+    END_FA
+	}
 
   if (z1 < 0)
   {
@@ -291,7 +290,7 @@ CMolecule::CalculateBoundingBox()
       atom->GetCoords(x, y, z);
       z += (-z1);
       atom->SetCoords(x, y, z);
-    END_FOREACH_ATOM()
+    END_FA
   }
 
   firstAtom->GetCoords(x1, y1, z1);
@@ -304,7 +303,7 @@ CMolecule::CalculateBoundingBox()
 		if(atom->GetX() > x2) x2 = atom->GetX();
 		if(atom->GetY() > y2) y2 = atom->GetY();
 		if(atom->GetZ() > z2) z2 = atom->GetZ();
-	END_FOREACH_ATOM()
+	END_FA
 
 	m_Width = fabs(x2-x1);
 	m_Height = fabs(y2-y1);
@@ -322,17 +321,16 @@ CMolecule::CalculateBoundingBox()
 	const static int scale_after_that = 10;
 	const static int max_atoms = 500;
 	
-	int cnt = m_Atoms.GetCount();
-	if(cnt >= max_atoms)
+	if(count >= max_atoms)
 	{
 		m_ElementScale = 0.3f; // exception
 		return;
 	}
 
-	if(cnt > scale_after_that)
+	if(count > scale_after_that)
 	{
 		// max scale is 1.0f, min scale is 0.2f
-		GLfloat ratio = (GLfloat)(cnt-scale_after_that)/(max_atoms-scale_after_that);
+		GLfloat ratio = (GLfloat)(count-scale_after_that)/(max_atoms-scale_after_that);
 		m_ElementScale = 1.0f - (ratio * (1.0f-0.3f));
 	}
 	else
@@ -352,7 +350,8 @@ CMolecule::CreateAtom(GLfloat x, GLfloat y, GLfloat z, TCHAR *atomName, int numb
 {
 	CAtom *a = new CAtom(atomName);
 	a->SetCoords(x, y, z);
-	m_Atoms.SetAt(number, a);
+	m_Atoms[number] = a;
+	//m_Atoms.SetAt(number, a);
 }
 
 bool
@@ -424,8 +423,8 @@ CMolecule::DoImpExplode()
 				}
 			}
 		}
-	END_FOREACH_ATOM()
-	if(all_atoms_ready && m_DrawMode == dmImplode)
+	END_FA
+	if (all_atoms_ready && m_DrawMode == dmImplode)
 		m_DrawMode = dmNormal; // dla explode nie ustawiam, zeby nie pokazywal linkow przy zoomout
 	return all_atoms_ready;
 }
@@ -444,7 +443,7 @@ CMolecule::DrawAtoms()
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
 		DrawSphereM(x, y, z, size, m_bWireMode, m_ElementScale);
-	END_FOREACH_ATOM()
+	END_FA
 }
 
 void
@@ -452,15 +451,23 @@ CMolecule::DrawLinks()
 {
 	// set default link color
 	glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, LINKCOLOR);
+
 	for (auto i = std::begin(m_AtomLinks);i != std::end(m_AtomLinks); ++i)
 	{
 		ATOMLINKPTR link = *i;
-		CAtom *fromAtom;
-		m_Atoms.Lookup(link->from, fromAtom);
-		CAtom *toAtom;
-		m_Atoms.Lookup(link->to, toAtom);
+		
+		// find atoms involved in link
+		CAtom *fromAtom = NULL, *toAtom = NULL;
+		auto p = m_Atoms.find(link->from);
+		if (p != m_Atoms.end())
+			fromAtom = p->second;
+		p = m_Atoms.find(link->to);
+		if (p != m_Atoms.end())
+			toAtom = p->second;
+
 		if(toAtom && fromAtom)
 		{
+			// ok, we have them both, draw the link
 			DrawTubeM(fromAtom->GetX(), fromAtom->GetY(), fromAtom->GetZ(),
 				toAtom->GetX(), toAtom->GetY(), toAtom->GetZ(), link->strength*0.1f, m_bWireMode, m_ElementScale);
 		}
@@ -470,12 +477,9 @@ CMolecule::DrawLinks()
 void
 CMolecule::Draw()
 {
-	if(m_Atoms.GetCount() == 0)
+	if (m_Atoms.size() == 0)
 		return;
 
-	// apply scaling and translations, if needed
-	//glTranslatef(TRANSLATIONS[0], TRANSLATIONS[1], TRANSLATIONS[2]);
-	
 	if(m_DrawMode == dmNormal)
 	{
 		if(!m_bFromDL)

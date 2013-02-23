@@ -4,6 +4,7 @@
 //#include <atlopengl.h> in stdafx.
 #include "Atom.h"
 #include <vector>
+#include <map>
 
 class CMolecule
 {
@@ -49,7 +50,7 @@ protected:
 	void DrawAtoms();
 
 	typedef CAtom* AtomPtr;
-	CAtlMap<int, AtomPtr> m_Atoms;
+	std::map<int, AtomPtr> m_Atoms;
 
 	typedef struct _ATOMLINK
 	{
