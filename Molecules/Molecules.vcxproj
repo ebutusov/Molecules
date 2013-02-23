@@ -144,7 +144,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AboutDlg.cpp" />
-    <ClCompile Include="Archive.cpp" />
     <ClCompile Include="Atom.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="GLDrawHelper.cpp" />
@@ -167,7 +166,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h" />
-    <ClInclude Include="Archive.h" />
     <ClInclude Include="atlopengl.h" />
     <ClInclude Include="atlwfile.h" />
     <ClInclude Include="Atom.h" />

@@ -1,12 +1,12 @@
 #pragma once
-#include "Archive.h" // xxx remove from project, not used anymore
+//#include "Archive.h" // not used, settings are stored in registry
 #include "Registry.h"
 
 //////////////////////////////////////////////////
 // Preferences data storage
 //////////////////////////////////////////////////
 
-#define SETTINGS_FILE "settings.bin"
+// #define SETTINGS_FILE "settings.bin"
 #define SETTINGS_KEY "Software\\MatrixInc\\Molecules\\Settings"
 
 typedef struct __PREFS
