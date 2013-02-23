@@ -33,12 +33,13 @@ public:
   BOOL GetSkip() { return m_bSkip; }
   void SetSkip(BOOL skip) { m_bSkip = skip; }
 public:
-	virtual ~CAtom(void);
+	virtual ~CAtom() {};
 private:
-
-	// non copyable, non assignable
-	CAtom(CAtom &other) {};
-	CAtom& operator=(CAtom &other) { return *this; }
+	// non copyable, non assignable, non moveable
+	CAtom(CAtom &other);
+	CAtom& operator=(CAtom &other);
+	CAtom(CAtom &&other);
+	CAtom& operator=(CAtom &&other);
 
 	TCHAR m_Name[4];
 	TCHAR m_FullName[20];

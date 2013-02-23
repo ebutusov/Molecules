@@ -3,12 +3,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <atlmisc.h>
+#include <memory>
 
 #include "GLDrawHelper.h"
-
-CGLDrawHelper::CGLDrawHelper(void)
-{
-}
 
 typedef struct { GLfloat x, y, z; } XYZ;
 
@@ -203,10 +200,11 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
 	// nvoglnt seems to be buggy in glCallLists
 	// looks like _sometimes_ it uses 4 bytes instead of one when GL_UNSIGNED_BYTE is passed
 	// this allocates 4 times more memory than needed
-	LPTSTR copy = new TCHAR[(copy_len+1)*4];
-	LPTSTR copyptr = copy;
-	_tcsncpy_s(copy, copy_len+1, string, copy_len);
-	TCHAR delims[] = "\r\n|";
+	std::unique_ptr<TCHAR[]> copy(new TCHAR[(copy_len + 1)*4]);
+	//LPTSTR copy = new TCHAR[(copy_len+1)*4];
+	LPTSTR copyptr = copy.get();
+	_tcsncpy_s(copyptr, copy_len+1, string, copy_len);
+	TCHAR delims[] = _T("\r\n|");
 	int y_pos = y;
 	TCHAR *context;
 
@@ -226,7 +224,7 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
       {
         glLoadIdentity();
         gluOrtho2D (0, window_width, 0, window_height);
-				LPTSTR sp = _tcstok_s(copy, delims, &context);
+				LPTSTR sp = _tcstok_s(copyptr, delims, &context);
 				int strings = 0;
 				while(sp != NULL)
 				{
@@ -234,7 +232,12 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
 					int len = _tcslen(sp);
 					glPushAttrib(GL_LIST_BIT);
 					glListBase(font_dlist);
+					// XXX CHECK THIS!
+#ifdef UNICODE
+					glCallLists(len, GL_UNSIGNED_SHORT, sp);
+#else
 					glCallLists(len, GL_UNSIGNED_BYTE, sp);
+#endif
 					glPopAttrib();
 					/*TCHAR *minuses = new TCHAR[len+1];
 					TCHAR *m = minuses;
@@ -259,7 +262,6 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
   }
   glPopAttrib();
   glMatrixMode(GL_MODELVIEW);
-	delete [] copyptr;
 }
 
 CGLDrawHelper::~CGLDrawHelper(void)

@@ -103,7 +103,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	ATLASSERT(SUCCEEDED(hRes));
 
 	// don't allow multiple instances, wait for previous to terminate
-	HANDLE mutex = ::CreateMutex(NULL, TRUE, "MoleculesInitMTX");
+	HANDLE mutex = ::CreateMutex(NULL, TRUE, _T("MoleculesInitMTX"));
 	if(mutex && ::GetLastError() == ERROR_ALREADY_EXISTS)
 	{
 		DWORD state = WaitForSingleObject(mutex, 500);
@@ -117,7 +117,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	// find out where our binary (.scr) is located
 	// this is used to locate molecules folder later
-	unique_ptr<TCHAR[]> mod(new TCHAR[MAX_PATH]);
+	std::unique_ptr<TCHAR[]> mod(new TCHAR[MAX_PATH]);
 	::GetModuleFileName(NULL, mod.get(), MAX_PATH-1);
 	*(_tcsrchr(mod.get(), '\\')+1) = '\0';
 	TCHAR drive;

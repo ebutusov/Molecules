@@ -3,15 +3,12 @@
 #include "resource.h"
 #include "SetPerformPg.h"
 #include "SetOptionsPg.h"
-#include "File.h"
-#include "Archive.h"
-#include "Exception.h"
 #include "SPrefs.h"
 
 class CSettingsSheet : public CPropertySheetImpl<CSettingsSheet>
 {
 public:
-	CSettingsSheet(ATL::_U_STRINGorID title = (LPCSTR)NULL, 
+	CSettingsSheet(ATL::_U_STRINGorID title = (LPCTSTR)NULL, 
 		UINT uStartPage = 0, HWND hWndParent = NULL);
 	virtual ~CSettingsSheet(void);
 	//LRESULT OnSaveData(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);

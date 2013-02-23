@@ -85,7 +85,7 @@ void
 CSetOptionsPg::DisplayError()
 {
 	::Beep(440, 100); ::Beep(600, 50);
-	MessageBox("You've entered incorrect value!", "Error", MB_OK|MB_ICONERROR);
+	MessageBox(_T("You've entered incorrect value!"), _T("Error"), MB_OK|MB_ICONERROR);
 }
 
 

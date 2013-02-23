@@ -6,9 +6,8 @@
 class CMoleculeBuilder
 {
 public:
-	CMoleculeBuilder(void);
-public:
-	virtual ~CMoleculeBuilder(void);
+	CMoleculeBuilder(void) {};
+	virtual ~CMoleculeBuilder(void) {};
 	CMolecule* LoadFromFile(LPCTSTR filename);
 private:
 	void BuildMolecule(CMolecule *mol, TCHAR *filebuf);

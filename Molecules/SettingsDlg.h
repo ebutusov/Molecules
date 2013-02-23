@@ -2,9 +2,6 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "SPrefs.h"
-#include "File.h"
-#include "Archive.h"
-#include "Exception.h"
 
 class CSettingsDlg : public CDialogImpl<CSettingsDlg>,
 	public CWinDataExchange<CSettingsDlg>

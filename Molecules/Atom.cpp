@@ -4,13 +4,13 @@
 
 CAtom::atom_defaults CAtom::m_AtomDefaults[] = 
 {
-	{ "H", "Hydrogen", 1.17f, { 0.7f, 0.7f, 0.7f, 1.0f } },	// white
-	{ "C", "Carbon", 1.75f, { 0.5f, 0.5f, 0.5f, 1.0f } },		// gray
-	{ "CA", "Calcium", 1.80f, { 0.0f, 0.0f, 1.0f, 1.0f } },	// blue
-	{ "N", "Nitrogen", 1.55f, { 0.5f, 0.0f, 1.0f, 1.0f } },	// violet ???
-	{ "O", "Oxygen", 1.40f, { 1.0f, 0.0f, 0.0f, 1.0f } },		// red
-	{ "P", "Phosphor", 1.28f, { 0.8f, 0.2f, 0.7f } },				// purple ???
-	{ "S", "Siarka",   1.80f, { 1.0f, 0.9f, 0.0f } }					// yellow ???
+	{ _T("H"), _T("Hydrogen"), 1.17f, { 0.7f, 0.7f, 0.7f, 1.0f } },	// white
+	{ _T("C"), _T("Carbon"), 1.75f, { 0.5f, 0.5f, 0.5f, 1.0f } },		// gray
+	{ _T("CA"), _T("Calcium"), 1.80f, { 0.0f, 0.0f, 1.0f, 1.0f } },	// blue
+	{ _T("N"), _T("Nitrogen"), 1.55f, { 0.5f, 0.0f, 1.0f, 1.0f } },	// violet ???
+	{ _T("O"), _T("Oxygen"), 1.40f, { 1.0f, 0.0f, 0.0f, 1.0f } },		// red
+	{ _T("P"), _T("Phosphor"), 1.28f, { 0.8f, 0.2f, 0.7f } },				// purple ???
+	{ _T("S"), _T("Sulfur"),   1.80f, { 1.0f, 0.9f, 0.0f } }					// yellow ???
 };
 
 CAtom::CAtom(TCHAR *name)
@@ -19,7 +19,7 @@ CAtom::CAtom(TCHAR *name)
 	m_YCoord = 0.0f;
 	m_ZCoord = 0.0f;
 	m_ScaledSize = 1.0f;
-	strncpy_s(m_Name, 4, name, 3);
+	_tcsncpy_s(&m_Name[0], 4, name, 3);
   m_bSkip = FALSE;
 	// TODO: check if defauts were loaded, if not, remove this atom
 	// and its links from the molecule
@@ -34,18 +34,14 @@ CAtom::CAtom(void)
 	m_ZCoord = 0.0f;
   m_bSkip = FALSE;
 	m_ScaledSize = 1.0f;
-	_tcsncpy_s(m_Name, 4, "UNK", 3);
-	_tcsncpy_s(m_FullName, 20, "UNKNOWN", 7);
-}
-
-CAtom::~CAtom(void)
-{
+	_tcsncpy_s(m_Name, 4, _T("UNK"), 3);
+	_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 }
 
 BOOL
 CAtom::SetName(TCHAR *name)
 {
-	strncpy_s(m_Name, 4, name, 3);
+	_tcsncpy_s(m_Name, 4, name, 3);
 	return LoadDefaults();
 }
 
@@ -173,7 +169,7 @@ CAtom::NearToOut(GLfloat tolerance)
 BOOL
 CAtom::LoadDefaults()
 {
-	if(m_Name == NULL || strlen(m_Name) == 0)
+	if(m_Name == NULL || _tcslen(m_Name) == 0)
 		return FALSE;
 
 	BOOL found = FALSE;
@@ -194,8 +190,8 @@ CAtom::LoadDefaults()
 	}
 	if(!found)
 	{
-		_tcsncpy_s(m_Name, 4, "UNK", 3);
-		_tcsncpy_s(m_FullName, 20, "UNKNOWN", 7);
+		_tcsncpy_s(m_Name, 4, _T("UNK"), 3);
+		_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 		this->m_Size = 1.0f;
 		this->m_ColorR = 0.0f;
 		this->m_ColorG = 1.0f;

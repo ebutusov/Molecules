@@ -7,8 +7,6 @@
 #include "MoleculeList.h"
 #include "atlwfile.h"
 #include "SPrefs.h"
-#include "File.h"
-#include "Archive.h"
 #include "Physics.h"
 #include "Helpers.h"
 #include <direct.h>
@@ -48,7 +46,7 @@ private:
 	CStringBlender m_Blender;
   GLuint m_textureFloor;
 public:
-	DECLARE_WND_CLASS("ScreenSaverClass")
+	DECLARE_WND_CLASS(_T("ScreenSaverClass"))
 	CSaverWindow(void);
 	~CSaverWindow(void);
 

@@ -621,7 +621,7 @@ BOOL CRegistry::WriteString(CString strName, CString strValue)
 	if (strValue.GetLength() > 254) return FALSE;
 
 #ifdef _UNICODE
-	wstrcpy(sz, LPCTSTR(strValue));
+	wcscpy(sz, LPCTSTR(strValue));
 #else
 	strcpy_s<255>(sz, LPCTSTR(strValue));
 #endif
@@ -631,7 +631,7 @@ BOOL CRegistry::WriteString(CString strName, CString strValue)
 	
 #ifdef _UNICODE
 	if (::RegSetValueEx(hKey, LPCTSTR(strName), 0,
-		REG_SZ, (LPBYTE)sz, wstrlen(sz) + 1)
+		REG_SZ, (LPBYTE)sz, wcslen(sz) + 1)
 		 != ERROR_SUCCESS) bSuccess = FALSE;
 #else
 	if (::RegSetValueEx(hKey, LPCTSTR(strName), 0,

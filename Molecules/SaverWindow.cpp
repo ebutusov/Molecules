@@ -36,9 +36,7 @@ HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 	if(!hwndParent)
 	{
 		dwStyle = WS_POPUP;
-#ifndef DEBUG
-		dwExStyle = WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
-#endif
+		dwExStyle = WS_EX_TOPMOST;
 		if(!lprc)
 		{
 			hwndParent = GetDesktopWindow();
@@ -49,7 +47,7 @@ HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 			rc.bottom += 1;
 			::ScreenToClientRect(hwndParent, &rc);
 #ifdef DEBUGDISPLAY
-			int hw = (rc.right-rc.left)/2;
+			/*int hw = (rc.right-rc.left)/2;
 			int hh = (rc.bottom-rc.top)/2;
 			rc.bottom /= 2;
 			rc.right /= 2;
@@ -58,7 +56,9 @@ HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 			rc.left += move_left;
 			rc.right += move_left;
 			rc.top += move_down;
-			rc.bottom += move_down;
+			rc.bottom += move_down;*/
+			rc.left = rc.right - (rc.right - rc.left)/3;
+			rc.bottom = (rc.bottom - rc.top)/3;
 #endif
 		}
 		else
@@ -71,7 +71,7 @@ HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 		::GetWindowRect(hwndParent, &rc);
 		::ScreenToClientRect(hwndParent, &rc);
 	}
-	HWND handle = CWindowImpl<CSaverWindow>::Create(hwndParent, rc, "Molecules", dwStyle, dwExStyle);
+	HWND handle = CWindowImpl<CSaverWindow>::Create(hwndParent, rc, _T("Molecules"), dwStyle, dwExStyle);
 	return handle;
 }
 
@@ -81,12 +81,6 @@ LRESULT CSaverWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 	// we can override some of these settings in the OnInit handler
 	m_bShowDesc = m_Settings.bShowDesc;
 	m_bShowFps = m_Settings.bShowFPS;
-	/*GLfloat min_speed = m_Settings.fXspeed > m_Settings.fYspeed ?
-		m_Settings.fYspeed : m_Settings.fXspeed;
-	min_speed = min_speed > m_Settings.fZspeed ? m_Settings.fZspeed :
-		min_speed;
-	min_speed = ceil(min_speed);
-	m_nMutateFactor = int(min_speed) > 0 ? int(min_speed) : 1;*/
 	bHandled = FALSE;	// pass msg to the base class (chained)
 	return 0;
 }
@@ -177,10 +171,10 @@ void CSaverWindow::OnInit()
 	// font display list
 	HFONT newFont = CreateFont(-20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
 			ANSI_CHARSET, 0, 0,
-			ANTIALIASED_QUALITY, 0, "Courier New");
+			ANTIALIASED_QUALITY, 0, _T("Courier New"));
 	
 	if(!newFont)
-		MessageBox("Cannot create font!", "Error", MB_OK|MB_ICONERROR);
+		MessageBox(_T("Cannot create font!"), _T("Error"), MB_OK|MB_ICONERROR);
 	else
 	{
 		CDC dc(this->GetDC());
@@ -226,8 +220,8 @@ CSaverWindow::LoadMolecule()
 	m_pMolecule = builder.LoadFromFile(mol);
 	if(m_pMolecule == NULL)
 	{
-		this->m_csErrorText.Format("Can't load molecule!\nDirectory: %s\n"
-			"This directory should contain folder named 'molecules' with *.pdb files", dir);
+		this->m_csErrorText.Format(_T("Can't load molecule!\nDirectory: %s\n")
+			_T("This directory should contain folder named 'molecules' with *.pdb files"), dir);
 		m_bError = TRUE;
 		m_State = opRender;
 	}
@@ -519,16 +513,16 @@ void CSaverWindow::OnRender()
 			CString desc;
 			if(!m_bShowFps)
 			{
-				desc.Format("%s", m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription()); 
+				desc.Format(_T("%s"), m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription()); 
 			}
 			else
 			{
-				desc.Format("%s\nFPS: %3d FTIME: %3d [ms]", 
+				desc.Format(_T("%s\nFPS: %3d FTIME: %3d [ms]"), 
 					m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription(), m_nFps, m_dFrameTime);
 			}
       //desc += legend;
 			CGLDrawHelper::DrawString(font_base, rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
-				(LPTSTR)(LPCSTR)desc, m_lTextHeight);
+				(LPTSTR)(LPCTSTR)desc, m_lTextHeight);
 		}   
 	}
 	else if(m_bError)
@@ -548,7 +542,7 @@ void CSaverWindow::OnRender()
 		CGLDrawHelper::DrawTube(0.0f, -10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);
 		if(!m_bScreenTooSmall)
 			CGLDrawHelper::DrawString(font_base, rect.right, rect.bottom,
-				0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight, (LPTSTR)(LPCSTR)m_csErrorText, m_lTextHeight);
+				0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight, (LPTSTR)(LPCTSTR)m_csErrorText, m_lTextHeight);
 	}
 	glFlush();
 	return;

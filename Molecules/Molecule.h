@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-//#include <atlopengl.h> in stdafx.
 #include "Atom.h"
 #include <vector>
 #include <map>
@@ -38,7 +37,6 @@ protected:
 	bool m_bWireMode;
 	static GLfloat LINKCOLOR[4];
 	CString m_Description;
-	//LPTSTR m_Description;
 	GLfloat TRANSLATIONS[3];
 	GLfloat m_Width, m_Height, m_Depth;
 	GLfloat m_Scale, m_ElementScale;

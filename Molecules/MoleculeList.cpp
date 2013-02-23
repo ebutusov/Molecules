@@ -15,7 +15,7 @@ CMoleculeList::~CMoleculeList(void)
 BOOL
 CMoleculeList::LoadList()
 {
-	ProcessDir("molecules");	// moge tak, bo ustawilem katalog roboczy
+	ProcessDir(_T("molecules"));	// moge tak, bo ustawilem katalog roboczy
 	return m_Molecules.GetCount()>0 ? true : false;
 }
 
@@ -60,7 +60,7 @@ CMoleculeList::ProcessDir(LPCTSTR dir)
 {
 	CFindFile finder;
 	CString pattern;
-	pattern.Format("%s\\*.*", dir);
+	pattern.Format(_T("%s\\*.*"), dir);
 	if(finder.FindFile(pattern))
 	{
 		do
@@ -68,19 +68,19 @@ CMoleculeList::ProcessDir(LPCTSTR dir)
 			if(finder.IsDots())
 				continue;
 			if(finder.IsDirectory())
-				ProcessDir((LPTSTR)(LPCSTR)finder.GetFilePath());
+				ProcessDir((LPTSTR)(LPCTSTR)finder.GetFilePath());
 			else
 			{
 				CString path = finder.GetFilePath();
 				int len = path.GetLength();
-				if(len > 4 && path.Right(3) == "pdb")
+				if(len > 4 && path.Right(3) == _T("pdb"))
 				{
 					LPTSTR file = new TCHAR[len+1];
 					_tcsncpy_s(file, len+1, finder.GetFilePath(), len);
 					this->m_Molecules.Add(file);		
 				}
 			}
-		} while(finder.FindNextFileA());
+		} while(finder.FindNextFile());
 	}
 	finder.Close();
 }
