@@ -7,118 +7,70 @@
 
 CTwister::CTwister()
 {
-	m_fXAngle = m_fYAngle = m_fZAngle = 0.0f;
-	m_fXSpeed = m_fYSpeed = m_fZSpeed = 0.0f;
-	m_fXSpeedMax = m_fYSpeedMax = m_fZSpeedMax = 0.0f;
-	m_fXAcc = m_fYAcc = m_fZAcc = 0.0f;
-	m_xdir = RANDOMSIGN();
-	m_ydir = RANDOMSIGN();
-	m_zdir = RANDOMSIGN();
-}
-CTwister::~CTwister()
-{
+	m_axis[0] = 1.0f; m_axis[1] =  1.0f; m_axis[2] = 1.0f;
+	m_axis_new[0] = 1.0f; m_axis_new[1] =  1.0f; m_axis_new[2] = 1.0f;
+	m_rot.CreateFromAxisAngle(0.0f, 1.0f, 0.0f, 0.0f);
+	Init(3.0f, 1.0f, 0.2f);
+	m_speed = m_max_speed / 2;
+	m_last_changed_acc = ::GetTickCount();
 }
 
 void
-CTwister::Init(GLfloat xmax, GLfloat ymax, GLfloat zmax)
+CTwister::Init(GLfloat max_speed, GLfloat min_speed, GLfloat acceleration)
 {
-	m_fXSpeed = m_fXSpeedMax = xmax;
-	m_fYSpeed = m_fYSpeedMax = ymax;
-	m_fZSpeed = m_fZSpeedMax = zmax;
-
-	// small initial accelerations
-	m_fXAcc = (m_fXSpeedMax/100)*((rand()%5)+1);
-	m_fYAcc = (m_fYSpeedMax/100)*((rand()%5)+1);
-	m_fZAcc = (m_fZSpeedMax/100)*((rand()%5)+1);
+	m_speed = m_max_speed = max_speed;
+	m_min_speed = min_speed;
+	m_acc = acceleration;
 }
 
 void
-CTwister::GetRotation(GLfloat &xang, GLfloat &yang, GLfloat &zang)
+CTwister::GetRotationMatrix(GLfloat *m)
 {
-	xang = m_fXAngle;
-	yang = m_fYAngle;
-	zang = m_fZAngle;
+  m_rot.CreateMatrix(m);
+}
+
+bool
+CTwister::Interpolate()
+{
+	static GLfloat step = 0.01f;
+	bool complete = true;
+	for (int i=0;i<2;++i)
+	{
+		GLfloat dx = m_axis_new[i] - m_axis[i];
+		if (fabs(dx) > step)
+		{
+			m_axis[i] += dx*step;
+			complete = false;
+		}
+	}
+	return complete;
 }
 
 void
 CTwister::DoFreeRotation2(DWORD delta)
 {
-	float speed = 180.0f; // per second
-	float acc = 0.01f; // acceleration
+	m_speed += m_acc * (float)(delta/1000.0f);
+	if (m_speed > 360.0f)
+		m_speed = m_speed - 360.0f;
+	CQuaternionf rx;
+	rx.CreateFromAxisAngle(m_axis[0], m_axis[1], m_axis[2], m_speed);
+	m_rot = rx * m_rot;
 
-	speed *= (float)delta/1000; 
+	Interpolate();
 
-	// normalization
-	m_fXAngle += speed;
-	m_fYAngle += speed;
-	//m_fZAngle += speed;
+	bool invert_acc = false;
 
-	/*if(m_fXAngle > 360.0f)
-		m_fXAngle = m_fXAngle - 360.0f;
-	else if(m_fXAngle < -360.0f)
-		m_fXAngle = m_fXAngle+360.0f;
-	m_fYAngle += speed;
-	if(m_fYAngle > 360.0f)
-		m_fYAngle = m_fYAngle - 360.0f;
-	else if(m_fYAngle < -360.0f)
-		m_fYAngle = m_fYAngle+ 360.0f;
-	m_fZAngle += speed;
-	if(m_fZAngle > 360.0f)
-		m_fZAngle = m_fZAngle - 360.0f;
-	else if(m_fZAngle < -360.0f)
-		m_fZAngle = m_fZAngle+360.0f;*/
-}
+	if (m_speed > m_max_speed|| m_speed < m_min_speed)
+		invert_acc = true;
 
-void
-CTwister::DoFreeRotation()
-{
-	m_fXAcc = (m_fXSpeedMax/100)*((rand()%5)+1);
-	m_fYAcc = (m_fYSpeedMax/100)*((rand()%5)+1);
-	m_fZAcc = (m_fZSpeedMax/100)*((rand()%5)+1);
-	if(fabs(m_fXSpeed) < m_fXSpeedMax)
-		m_fXSpeed += m_xdir*m_fXAcc;
-	else if(COINTHROW(200,1))
+	if (::GetTickCount()/1000 - m_last_changed_acc/1000 > 2)
 	{
-		m_xdir = -m_xdir;
-		
-		m_fXSpeed += m_xdir*m_fXAcc;
-	}
-	if(fabs(m_fYSpeed) < m_fYSpeedMax)
-		m_fYSpeed += m_ydir*m_fYAcc;
-	else if(COINTHROW(200, 1))
-	{
-		m_ydir = -m_ydir;
-		m_fYSpeed += m_ydir*m_fYAcc;
-	}
-	if(fabs(m_fZSpeed) < m_fZSpeedMax)
-		m_fZSpeed += m_zdir*m_fZAcc;
-	else if(COINTHROW(200, 1))
-	{	
-		m_zdir = -m_zdir;
-		m_fZSpeed += m_zdir*m_fZAcc;
+		m_axis_new[0] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
+		m_axis_new[1] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
+		m_axis_new[2] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
+		m_last_changed_acc = ::GetTickCount();
 	}
 
-	m_fXAngle += m_fXSpeed;
-	if(m_fXAngle > 360.0f)
-		m_fXAngle = m_fXAngle - 360.0f;
-	else if(m_fXAngle < -360.0f)
-		m_fXAngle = m_fXAngle+360.0f;
-	m_fYAngle += m_fYSpeed;
-	if(m_fYAngle > 360.0f)
-		m_fYAngle = m_fYAngle - 360.0f;
-	else if(m_fYAngle < -360.0f)
-		m_fYAngle = m_fYAngle+ 360.0f;
-	m_fZAngle += m_fZSpeed;
-	if(m_fZAngle > 360.0f)
-		m_fZAngle = m_fZAngle - 360.0f;
-	else if(m_fZAngle < -360.0f)
-		m_fZAngle = m_fZAngle+360.0f;
-
-	if(COINTHROW(50, 25))
-	{
-		m_xdir = RANDOMSIGN();
-		m_ydir = RANDOMSIGN();
-		m_zdir = RANDOMSIGN();
-	}
-
+	if (invert_acc)
+		m_acc *= -1;
 }

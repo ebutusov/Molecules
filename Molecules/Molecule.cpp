@@ -134,25 +134,27 @@ CMolecule::EnableWire(bool enable)
 }
 
 void
-CMolecule::InitExplosion(GLfloat step, GLfloat factor)
+CMolecule::InitExplosion(GLfloat dist_factor)
 {
-	this->m_ExplosionStep = step;
-	CalculateOutValues(factor);
+	CalculateOutValues(dist_factor);
 	FOREACH_ATOM(atom)
 		atom->SetNormalAsCurrent();
 		atom->SetMoveStatus(TRUE);
+		GLfloat speed = (GLfloat)(rand()%10+5); // /10;
+		atom->SetSpeed(speed);
 	END_FA
 	m_DrawMode = dmExplode;
 }
 
 void
-CMolecule::InitImplosion(GLfloat step, GLfloat factor)
+CMolecule::InitImplosion(GLfloat dist_factor)
 {
-	CalculateOutValues(factor);	// this should be done only once
-	this->m_ExplosionStep = step;
+	CalculateOutValues(dist_factor);	// this should be done only once
 	FOREACH_ATOM(atom)
 		atom->SetOutAsCurrent();
 		atom->SetMoveStatus(TRUE);
+		GLfloat speed = (GLfloat)(rand()%3+3); // /10;
+		atom->SetSpeed(speed);
 	END_FA
 	m_DrawMode = dmImplode;
 }
@@ -217,8 +219,6 @@ CMolecule::CalculateOutValues(GLfloat dist_factor)
 		y += ydir*dist_factor*(rand()%(int)(max+1));
 		z += zdir*dist_factor*(rand()%(int)(max+1));
 		atom->SetOutCoords(x, y, z);
-		GLfloat speed = (GLfloat)(rand()%6+3)/10;
-		atom->SetSpeed(speed);
 	END_FA
 }
 
@@ -349,13 +349,14 @@ CMolecule::CreateAtom(GLfloat x, GLfloat y, GLfloat z, TCHAR *atomName, int numb
 }
 
 bool
-CMolecule::DoImpExplode()
+CMolecule::DoImpExplode(GLfloat delta)
 {
 	bool all_atoms_ready = TRUE;
 	FOREACH_ATOM(atom)
 		if(atom->GetMoveStatus())
 		{
-			GLfloat speed = atom->GetSpeed()*(m_ExplosionStep);
+			GLfloat speed = atom->GetSpeed() * delta;
+			//GLfloat speed = atom->GetSpeed()*(m_ExplosionStep);
 			GLfloat size = this->m_bDrawLinks ? atom->GetScaledSize()/2 : atom->GetSize()/2;
 			all_atoms_ready = FALSE;
 			if(m_DrawMode == dmImplode)
@@ -389,7 +390,7 @@ CMolecule::DoImpExplode()
 			else if(m_DrawMode == dmExplode)
 			{
 				// dla explozji nie ma sensu tego sprawdzac
-				if(atom->NearToOut(this->m_ExplosionStep))
+				if(atom->NearToOut(speed))
 				{
 					atom->SetOutAsCurrent();
 					atom->SetMoveStatus(FALSE);

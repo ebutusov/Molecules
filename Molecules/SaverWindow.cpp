@@ -231,7 +231,7 @@ CSaverWindow::LoadMolecule()
 		m_pMolecule->EnableLinks(m_Settings.bShowLinks);
 		m_pMolecule->EnableWire(m_Settings.bWire);
 		if(m_Settings.bAnimateBuild)
-			m_pMolecule->InitImplosion(0.3f, 2.0f);
+			m_pMolecule->InitImplosion(2.0f);
 		if(m_Settings.bTeleType)
 			m_Blender.SetString(m_pMolecule->GetDescription(), 5);
 		ok = TRUE;
@@ -252,7 +252,7 @@ CSaverWindow::RunSaver()
 	else
 		m_StopTime = 0;
 
-	m_Twister.Init(m_Settings.fXspeed, m_Settings.fYspeed, m_Settings.fZspeed);
+	//m_Twister.Init(m_Settings.fXspeed, m_Settings.fYspeed, m_Settings.fZspeed);
 	BOOL ret = TRUE;
   if(m_pMolecule)
 	{
@@ -269,15 +269,14 @@ CSaverWindow::RunSaver()
 
   if (m_Settings.bReflection)
     m_fZoom = 0.0f;
+	m_dLastMove = GetTickCount();
   RedrawWindow();
   return ret;
 }
 
 LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 {
-	static DWORD last_move = GetTickCount();
-	
-  if(wParam == TIMER_FPS)
+	if(wParam == TIMER_FPS)
 	{
 		// blanks screen after specified amount of time
 		if(m_bTouchExit && m_StopTime && GetTickCount() >= m_StopTime)
@@ -292,7 +291,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				m_pMolecule = NULL;
 			}
 			//m_Twister.DoFreeRotation();
-			//last_move = GetTickCount();
+			//m_dLastMove= GetTickCount();
 			RedrawWindow();
 			return 0;
 		}
@@ -308,17 +307,19 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	else if(wParam == TIMER_MOVE)
 	{
 		DWORD tick = GetTickCount();
-		DWORD delta = tick - last_move;
-		//m_Twister.DoFreeRotation();
-		//RedrawWindow();
-		if(GetTickCount() - last_move >= m_Settings.dMoveDelay)
+		DWORD delta = tick - m_dLastMove;
+		if (delta == 0)
+			delta = 20000;
+		GLfloat dsec = (GLfloat)delta/1000.0f;
+		m_Twister.DoFreeRotation2(delta);
+		if(GetTickCount() - m_dLastMove >= m_Settings.dMoveDelay)
 		{		
-			m_Twister.DoFreeRotation2(delta);
-			last_move = GetTickCount();
+			//m_Twister.DoFreeRotation2(delta);
+			m_dLastMove= GetTickCount();
 		}
 		else
 		{
-			last_move = GetTickCount();
+			m_dLastMove= GetTickCount();
 			RedrawWindow();
 			m_dFrameTime = GetTickCount()-tick;
 			return 0;
@@ -340,15 +341,16 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
             // because new molecule may have different size
             if (fabs(fabs(m_fZoom) - fabs(zoom_rate)) > 1.0f)
             {
+							// was 0.2f
               if (m_fZoom < zoom_rate)
-                m_fZoom += 0.2f;
+                m_fZoom += 10.0f * dsec;
               else
-                m_fZoom -= 0.2f;
+                m_fZoom -= 10.0f * dsec;
             }
           }
           else
           {
-            m_fZoom += 3.0f;
+            m_fZoom += 10.0f * dsec;
 					  if(m_fZoom > zoom_rate)
             {
 						  m_fZoom = zoom_rate;
@@ -358,7 +360,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 
 					if(m_Settings.bAnimateBuild)
 					{	
-						if(m_pMolecule->DoImpExplode())
+						if(m_pMolecule->DoImpExplode(dsec))
 							m_State = opRender;
 					}
 					else if(m_fZoom == zoom_rate)
@@ -367,7 +369,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 			break;
 			case opZoomOut:
 				if(m_pMolecule == NULL)
-					m_fZoom = -10.0f;
+					m_fZoom = -10.0f * dsec;
 				else
 				{
           if (m_Settings.bReflection)
@@ -376,17 +378,17 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
             // visible area
             BOOL ready = TRUE;
             if (m_fZoom < 0.0f)
-              m_fZoom += 1.0f;
+              m_fZoom += 10.0f * dsec;
             if(m_Settings.bAnimateBuild)
-						  ready = m_pMolecule->DoImpExplode();
+						  ready = m_pMolecule->DoImpExplode(dsec) && fabs(m_fZoom) < 3.0f;
             if (ready)
               LoadMolecule();
           }
           else
           {
-					  m_fZoom -= 3.0f;
+					  m_fZoom -= 3.0f * dsec;
 					  if(m_Settings.bAnimateBuild)
-						  m_pMolecule->DoImpExplode();
+						  m_pMolecule->DoImpExplode(dsec);
 					  if(m_fZoom < -150.0f)
 					  {
 						  m_fZoom = -150.0f;
@@ -445,7 +447,8 @@ void CSaverWindow::OnRender()
     m_pMolecule->GetTranslations(tx, ty, tz);
 	  double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
 		GLfloat x,y,z;
-	  m_Twister.GetRotation(x, y, z);
+		GLfloat matrix[16];
+		m_Twister.GetRotationMatrix(matrix);
     gluLookAt(-tx, -(ty-3.0f), zoom, 0, -ty, 0, 0, 1, 0);
 
     if (mirror)
@@ -469,9 +472,10 @@ void CSaverWindow::OnRender()
       glPushMatrix();
         glScalef(1.0f, -1.0, 1.0f); // scale y axis  
         glTranslatef(0.0f, dim/2+0.8f, 0.0f);
-        glRotatef(z, 0.0f, 0.0f, 1.0f);
-				glRotatef(y, 0.0f, 1.0f, 0.0f);	
-	      glRotatef(x, 1.0f, 0.0f, 0.0f);
+				glMultMatrixf(matrix);
+				//glRotatef(x, 1.0f, 0.0f, 0.0f);
+				//glRotatef(y, 0.0f, 1.0f, 0.0f);	
+        //glRotatef(z, 0.0f, 0.0f, 1.0f);
 	      glTranslatef(tx, ty, tz);
         m_pMolecule->Draw();
       glPopMatrix();
@@ -498,9 +502,10 @@ void CSaverWindow::OnRender()
 		glRotatef(z, 0.0f, 0.0f, 1.0f);
 		glTranslatef(tx, ty, tz);*/
 		glTranslatef(0.0f, dim/2+0.8f, 0.0f);	// rotate aroud this origin ...
-		glRotatef(z, 0.0f, 0.0f, 1.0f);				// with these angles ...
-		glRotatef(y, 0.0f, 1.0f, 0.0f);	
-		glRotatef(x, 1.0f, 0.0f, 0.0f);
+		glMultMatrixf(matrix);
+		//glRotatef(x, 1.0f, 0.0f, 0.0f);
+		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
+		//glRotatef(z, 0.0f, 0.0f, 1.0f);				// with these angles ...
 		glTranslatef(tx, ty, tz);							// object placed here
     
 		m_pMolecule->Draw();
@@ -526,15 +531,18 @@ void CSaverWindow::OnRender()
 	}
 	else if(m_bError)
 	{
+		GLfloat matrix[16];
+		m_Twister.GetRotationMatrix(matrix);
 		RECT rect;
 		this->GetClientRect(&rect);
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glTranslatef(0.0f, 0.0f, -20.0f);
-		GLfloat x, y, z;
-		m_Twister.GetRotation(x, y, z);
-		glRotatef(y, 0.0f, 1.0f, 0.0f);	
-		glRotatef(x, 1.0f, 0.0f, 0.0f);
-		glRotatef(z, 0.0f, 0.0f, 1.0f);
+		glMultMatrixf(matrix);
+		//GLfloat x, y, z;
+		//m_Twister.GetRotation(x, y, z);
+		//glRotatef(x, 1.0f, 0.0f, 0.0f);
+		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
+		//glRotatef(z, 0.0f, 0.0f, 1.0f);
 		static GLfloat tcs[4] = { 1.0f, 0.2f, 0.4f, 1.0f };
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tcs);
 		CGLDrawHelper::DrawTube(-10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);

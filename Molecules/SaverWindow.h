@@ -32,6 +32,7 @@ private:
 	LPARAM m_paramCoord;
 	BOOL m_bHaveCoord;
 	CString m_csErrorText;
+	DWORD m_dLastMove;
 	CMoleculeList m_MManager;
 	CTwister m_Twister;
 	BOOL LoadMolecule();
