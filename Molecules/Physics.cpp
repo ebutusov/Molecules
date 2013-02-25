@@ -4,23 +4,29 @@
 
 #define RANDOMSIGN() (rand()%2 > 0 ? 1 : -1)
 #define COINTHROW(pool, val) ((rand()%pool+1) == val)
+#define RANDX(x) !(rand()%x)
 
 CTwister::CTwister()
+{
+	Init(3.0f, 0.2f);
+}
+
+void
+CTwister::Init(GLfloat max_speed, GLfloat acceleration)
 {
 	m_axis[0] = 1.0f; m_axis[1] =  1.0f; m_axis[2] = 1.0f;
 	m_axis_new[0] = 1.0f; m_axis_new[1] =  1.0f; m_axis_new[2] = 1.0f;
 	m_rot.CreateFromAxisAngle(0.0f, 1.0f, 0.0f, 0.0f);
-	Init(3.0f, 1.0f, 0.2f);
-	m_speed = m_max_speed / 2;
 	m_last_changed_acc = ::GetTickCount();
-}
-
-void
-CTwister::Init(GLfloat max_speed, GLfloat min_speed, GLfloat acceleration)
-{
-	m_speed = m_max_speed = max_speed;
-	m_min_speed = min_speed;
-	m_acc = acceleration;
+	m_max_speed = max_speed;
+	m_acc = m_max_speed/20.0f;
+	m_slowing_down = false;
+	if (m_max_speed > 0.0f)
+		m_speed = m_max_speed/3.0f;
+	//if (m_acc == 0.0f)
+	//	m_speed = m_max_speed;
+	//else
+	//	m_speed = m_max_speed/3.0f;
 }
 
 void
@@ -30,11 +36,11 @@ CTwister::GetRotationMatrix(GLfloat *m)
 }
 
 bool
-CTwister::Interpolate()
+CTwister::Interpolate(GLfloat delta)
 {
-	static GLfloat step = 0.01f;
+	GLfloat step = 0.5f * delta;
 	bool complete = true;
-	for (int i=0;i<2;++i)
+	for (int i=0;i<3;++i)
 	{
 		GLfloat dx = m_axis_new[i] - m_axis[i];
 		if (fabs(dx) > step)
@@ -47,23 +53,52 @@ CTwister::Interpolate()
 }
 
 void
-CTwister::DoFreeRotation2(DWORD delta)
+CTwister::DoFreeRotation(DWORD delta)
 {
-	m_speed += m_acc * (float)(delta/1000.0f);
-	if (m_speed > 360.0f)
-		m_speed = m_speed - 360.0f;
+	if (m_max_speed == 0.0f)
+		return;
+
+	GLfloat dt = (GLfloat)(delta/1000.0f);
+	
+	m_speed += m_acc * dt;
+
 	CQuaternionf rx;
 	rx.CreateFromAxisAngle(m_axis[0], m_axis[1], m_axis[2], m_speed);
 	m_rot = rx * m_rot;
 
-	Interpolate();
-
+	bool complete = Interpolate(dt);
 	bool invert_acc = false;
 
-	if (m_speed > m_max_speed|| m_speed < m_min_speed)
-		invert_acc = true;
+	if (m_speed > m_max_speed)
+	{
+		m_speed = m_max_speed;
+		if (RANDX(50))
+		{
+			invert_acc = true;
+			m_slowing_down = true;
+		}
+	}
+	else if (m_speed < -m_max_speed)
+	{
+		m_speed = -m_max_speed;
+		if (RANDX(50))
+		{
+			invert_acc = true;
+			m_slowing_down = true;
+		}
+	}
 
-	if (::GetTickCount()/1000 - m_last_changed_acc/1000 > 2)
+	// it's about to stop, chance to change direction and acceleration
+	if (fabs(m_speed) < 0.5f && m_slowing_down)
+	{
+		if (RANDX(10))
+			invert_acc = true;
+
+		// pasing 0 point  - accelerating again
+		m_slowing_down = false;
+	}
+
+	if (GetTickCount()/1000 - m_last_changed_acc/1000 > 2 && complete)
 	{
 		m_axis_new[0] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
 		m_axis_new[1] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
@@ -72,5 +107,7 @@ CTwister::DoFreeRotation2(DWORD delta)
 	}
 
 	if (invert_acc)
+	{
 		m_acc *= -1;
+	}
 }

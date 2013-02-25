@@ -252,7 +252,7 @@ CSaverWindow::RunSaver()
 	else
 		m_StopTime = 0;
 
-	//m_Twister.Init(m_Settings.fXspeed, m_Settings.fYspeed, m_Settings.fZspeed);
+	m_Twister.Init(m_Settings.fMaxSpeed, m_Settings.fAcceleration);
 	BOOL ret = TRUE;
   if(m_pMolecule)
 	{
@@ -309,9 +309,9 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 		DWORD tick = GetTickCount();
 		DWORD delta = tick - m_dLastMove;
 		if (delta == 0)
-			delta = 20000;
+			delta = 200;
 		GLfloat dsec = (GLfloat)delta/1000.0f;
-		m_Twister.DoFreeRotation2(delta);
+		m_Twister.DoFreeRotation(delta);
 		if(GetTickCount() - m_dLastMove >= m_Settings.dMoveDelay)
 		{		
 			//m_Twister.DoFreeRotation2(delta);
@@ -446,7 +446,6 @@ void CSaverWindow::OnRender()
     GLfloat tx, ty, tz;
     m_pMolecule->GetTranslations(tx, ty, tz);
 	  double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
-		GLfloat x,y,z;
 		GLfloat matrix[16];
 		m_Twister.GetRotationMatrix(matrix);
     gluLookAt(-tx, -(ty-3.0f), zoom, 0, -ty, 0, 0, 1, 0);

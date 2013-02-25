@@ -25,17 +25,15 @@ public:
 	END_MSG_MAP()
 	BEGIN_DDX_MAP(CSetPerformPg)
 		DDX_CONTROL_HANDLE(IDC_DELAY, m_trackDelay)
-		DDX_CONTROL_HANDLE(IDC_XSPEED, m_trackXSpeed)
-		DDX_CONTROL_HANDLE(IDC_YSPEED, m_trackYSpeed)
-		DDX_CONTROL_HANDLE(IDC_ZSPEED, m_trackZSpeed)
+		DDX_CONTROL_HANDLE(IDC_MAXSPEED, m_maxSpeed)
+		DDX_CONTROL_HANDLE(IDC_ACCELERATION, m_acceleration)
 	END_DDX_MAP()
 
 	SPreferences *m_pPrefs;
 private:
 	BOOL m_bChanged;
 	CTrackBarCtrl m_trackDelay;
-	CTrackBarCtrl m_trackXSpeed;
-	CTrackBarCtrl m_trackYSpeed;
-	CTrackBarCtrl m_trackZSpeed;
+	CTrackBarCtrl m_maxSpeed;
+	CTrackBarCtrl m_acceleration;
 	void UpdateControls();
 };
