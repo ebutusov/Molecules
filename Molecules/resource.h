@@ -44,11 +44,14 @@
 #define IDC_CHKBUILD                    1026
 #define IDC_LBEXITTIME                  1027
 #define IDC_YSPEED                      1027
+#define IDC_MINSPEED                    1027
 #define IDC_EDITEXITAFTER               1028
 #define IDC_ZSPEED                      1028
+#define IDC_ACCELERATION                1028
 #define IDC_LBPRESTIMEDESC2             1029
 #define IDC_LBEXITTIMEDESC              1029
 #define IDC_XSPEED                      1029
+#define IDC_MAXSPEED                    1029
 #define IDC_LBDELAY                     1030
 #define IDC_LBDELAY3                    1031
 #define IDC_LBDELAY4                    1032

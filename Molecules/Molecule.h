@@ -23,10 +23,10 @@ public:
 	void CalculateBoundingBox();
   void GetTranslations(GLfloat &x, GLfloat &y, GLfloat &z);
 	void CalculateOutValues(GLfloat factor);
-	void InitExplosion(GLfloat step = 1.0f, GLfloat dist_factor = 2.0f);
-	void InitImplosion(GLfloat step = 1.0f, GLfloat dist_factor = 2.0f);
+	void InitExplosion(GLfloat dist_factor = 2.0f);
+	void InitImplosion(GLfloat dist_factor = 2.0f);
 
-	bool DoImpExplode();
+	bool DoImpExplode(GLfloat delta);
 	typedef enum DrawingMode { dmNormal, dmExplode, dmImplode };
 
 	virtual ~CMolecule(void);
@@ -40,7 +40,6 @@ protected:
 	GLfloat TRANSLATIONS[3];
 	GLfloat m_Width, m_Height, m_Depth;
 	GLfloat m_Scale, m_ElementScale;
-	GLfloat m_ExplosionStep;
 	void RescaleAtoms();
 	GLuint m_dl;
 	bool m_bFromDL;

@@ -12,9 +12,8 @@
 typedef struct __PREFS
 {
 
-	GLfloat fXspeed;	// x-axis acceleration: from 0.0f to 5.0f
-	GLfloat fYspeed;	// y-axis acceleration: from 0.0f to 5.0f
-	GLfloat fZspeed;	// y-axis acceleration: from 0.0f to 5.0f
+	GLfloat fMaxSpeed;	// x-axis acceleration: from 0.0f to 5.0f
+	GLfloat fMinSpeed;	// y-axis acceleration: from 0.0f to 5.0f
 	DWORD dMoveDelay;	// delay between frames: from 0 to 30 ms
 	DWORD dShowTime;	// molecule presentation time: from 10000 to 60000 ms
 	BOOL bShowDesc;		// show or hide molecule name: true or false
@@ -32,9 +31,7 @@ typedef struct __PREFS
     CRegistry reg;
     reg.SetRootKey(HKEY_CURRENT_USER);
     reg.SetKey(SETTINGS_KEY, TRUE);
-    fXspeed = (GLfloat)reg.ReadFloat("SpeedX", 1.0f);
-    fYspeed = (GLfloat)reg.ReadFloat("SpeedY", 0.8f);
-    fZspeed = (GLfloat)reg.ReadFloat("SpeedZ", 0.5f);
+    fMaxSpeed = (GLfloat)reg.ReadFloat("MaxSpeed", 3.0f);
     dShowTime = reg.ReadDword("ShowTime", 30000);
     dMoveDelay = reg.ReadDword("MoveDelay", 30);
     bShowDesc = reg.ReadBool("ShowDesc", TRUE);
@@ -56,9 +53,7 @@ typedef struct __PREFS
     reg.SetRootKey(HKEY_CURRENT_USER);
     if (reg.SetKey(SETTINGS_KEY, TRUE))
     {
-      reg.WriteFloat("SpeedX", fXspeed);
-      reg.WriteFloat("SpeedY", fYspeed);
-      reg.WriteFloat("SpeedZ", fZspeed);
+      reg.WriteFloat("MaxSpeed", fMaxSpeed);
       reg.WriteDword("ShowTime", dShowTime);
       reg.WriteDword("MoveDelay", dMoveDelay);
       reg.WriteBool("ShowFPS", bShowFPS);
