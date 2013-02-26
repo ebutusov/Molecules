@@ -4,10 +4,11 @@
 class CTwister
 {
 public:
+	CTwister(float max_speed);
 	CTwister();
 	virtual ~CTwister() {};
 
-	void Init(GLfloat max_speed, GLfloat acceleration);
+	void Init(GLfloat max_speed);
 	void DoFreeRotation(DWORD delta);
 	void ResetState();
 	void CTwister::GetRotationMatrix(GLfloat *m);

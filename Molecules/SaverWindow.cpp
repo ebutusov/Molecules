@@ -8,7 +8,7 @@
 #define DEBUGDISPLAY
 #endif
 
-CSaverWindow::CSaverWindow(void)
+CSaverWindow::CSaverWindow()
 {
 	m_bHaveCoord = false;
 	/*m_fXAngle = m_fYAngle = m_fZAngle = 0.0f;*/
@@ -252,7 +252,7 @@ CSaverWindow::RunSaver()
 	else
 		m_StopTime = 0;
 
-	m_Twister.Init(m_Settings.fMaxSpeed, m_Settings.fAcceleration);
+	m_Twister.Init(m_Settings.fMaxSpeed);
 	BOOL ret = TRUE;
   if(m_pMolecule)
 	{

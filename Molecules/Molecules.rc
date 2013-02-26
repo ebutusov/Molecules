@@ -69,7 +69,6 @@ CAPTION "Performance"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_DELAY,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,38,25,187,20
-    CONTROL         "",IDC_ACCELERATION,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,37,101,187,22
     CONTROL         "",IDC_MAXSPEED,"msctls_trackbar32",TBS_AUTOTICKS | WS_TABSTOP,38,63,187,22
     CTEXT           "Rendering delay",IDC_LBDELAY,45,14,175,9
     CTEXT           "Max speed",IDC_LBDELAY3,9,25,25,18
@@ -77,9 +76,6 @@ BEGIN
     CTEXT           "Max rotation speed",IDC_LBDELAY5,45,50,175,9
     CTEXT           "Low",IDC_LBDELAY6,9,67,25,11
     CTEXT           "High",IDC_LBDELAY7,231,65,25,11
-    CTEXT           "Acceleration",IDC_LBDELAY11,45,89,175,9
-    CTEXT           "Low",IDC_LBDELAY12,9,104,25,11
-    CTEXT           "High",IDC_LBDELAY13,231,104,25,11
 END
 
 IDD_SETOPTSPG DIALOGEX 0, 0, 264, 176

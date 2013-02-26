@@ -6,27 +6,33 @@
 #define COINTHROW(pool, val) ((rand()%pool+1) == val)
 #define RANDX(x) !(rand()%x)
 
+CTwister::CTwister(float max_speed)
+{
+	Init(max_speed);
+}
+
 CTwister::CTwister()
 {
-	Init(3.0f, 0.2f);
+	Init(3.0f);
+}
+
+void CTwister::ResetState()
+{
+	Init(m_max_speed);
 }
 
 void
-CTwister::Init(GLfloat max_speed, GLfloat acceleration)
+CTwister::Init(GLfloat max_speed)
 {
 	m_axis[0] = 1.0f; m_axis[1] =  1.0f; m_axis[2] = 1.0f;
 	m_axis_new[0] = 1.0f; m_axis_new[1] =  1.0f; m_axis_new[2] = 1.0f;
 	m_rot.CreateFromAxisAngle(0.0f, 1.0f, 0.0f, 0.0f);
 	m_last_changed_acc = ::GetTickCount();
 	m_max_speed = max_speed;
-	m_acc = m_max_speed/20.0f;
+	m_acc = m_max_speed/50.0f;
 	m_slowing_down = false;
 	if (m_max_speed > 0.0f)
 		m_speed = m_max_speed/3.0f;
-	//if (m_acc == 0.0f)
-	//	m_speed = m_max_speed;
-	//else
-	//	m_speed = m_max_speed/3.0f;
 }
 
 void
