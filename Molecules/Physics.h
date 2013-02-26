@@ -17,7 +17,7 @@ private:
 	bool m_slowing_down;
 	GLfloat m_max_speed;
 	CQuaternionf m_rot;
-	DWORD m_last_changed_acc;
+	DWORD m_interp_started;
 	GLfloat m_axis[3], m_axis_new[3];
 	GLfloat m_speed, m_acc;
 	bool Interpolate(GLfloat delta);

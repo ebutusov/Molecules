@@ -22,7 +22,7 @@ CSetPerformPg::OnApply()
 
 	if(m_bChanged)	// dodatkowe rozpoznanie zmian
 	{
-		m_pPrefs->dMoveDelay = m_trackDelay.GetPos();
+		m_pPrefs->dFrameDelay = m_trackDelay.GetPos();
 		m_pPrefs->fMaxSpeed = (GLfloat)m_maxSpeed.GetPos()/100.0f;
 		m_bChanged = FALSE;
 	}
@@ -48,11 +48,11 @@ CSetPerformPg::OnHScroll(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 void
 CSetPerformPg::UpdateControls()
 {
-	m_trackDelay.SetRange(5, 40, TRUE);
-	m_maxSpeed.SetRange(0, 1000, TRUE);
+	m_trackDelay.SetRange(0, 50, TRUE);
+	m_maxSpeed.SetRange(0, 500, TRUE);
 	m_maxSpeed.SetTicFreq(100);
 	m_maxSpeed.SetPos((int)(m_pPrefs->fMaxSpeed*100));
-	m_trackDelay.SetPos(m_pPrefs->dMoveDelay);
+	m_trackDelay.SetPos(m_pPrefs->dFrameDelay);
 	//DoDataExchange(DDX_LOAD);
 }
 

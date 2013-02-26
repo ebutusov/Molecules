@@ -136,7 +136,7 @@ CMolecule::EnableWire(bool enable)
 void
 CMolecule::InitExplosion(GLfloat dist_factor)
 {
-	CalculateOutValues(dist_factor);
+	//CalculateOutValues(dist_factor);
 	FOREACH_ATOM(atom)
 		atom->SetNormalAsCurrent();
 		atom->SetMoveStatus(TRUE);
@@ -153,7 +153,7 @@ CMolecule::InitImplosion(GLfloat dist_factor)
 	FOREACH_ATOM(atom)
 		atom->SetOutAsCurrent();
 		atom->SetMoveStatus(TRUE);
-		GLfloat speed = (GLfloat)(rand()%3+3); // /10;
+		GLfloat speed = (GLfloat)(rand()%5+2); // /10;
 		atom->SetSpeed(speed);
 	END_FA
 	m_DrawMode = dmImplode;
@@ -398,6 +398,7 @@ CMolecule::DoImpExplode(GLfloat delta)
 				}
 				else
 				{
+					all_atoms_ready = FALSE;
 					GLfloat x,y,z;
 					atom->GetCurrentCoords(x, y, z);
 					GLfloat xo, yo, zo;

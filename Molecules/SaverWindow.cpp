@@ -3,28 +3,29 @@
 #include "SaverWindow.h"
 #include "TextureLoader.h"
 #include <math.h>
+#include <memory>
 
 #ifdef DEBUG
 #define DEBUGDISPLAY
 #endif
 
-CSaverWindow::CSaverWindow()
-{
-	m_bHaveCoord = false;
-	/*m_fXAngle = m_fYAngle = m_fZAngle = 0.0f;*/
-	m_pMolecule = NULL;
-	m_fZoom = -100.0f;
-	m_nFpsCount = 0;
-	m_nFps = 0;
-	m_dFrameTime = 0; // czas potrzebny na wyrenderowanie jednej ramki
-	m_bShowDesc = TRUE;
-	m_bScreenTooSmall = FALSE;
-	m_State = opZoomIn;
-}
+#define TICK() ::GetTickCount()
 
-CSaverWindow::~CSaverWindow(void)
-{
-}
+CSaverWindow::CSaverWindow() :
+
+	m_bHaveCoord(false),
+	m_pMolecule(NULL),
+	m_fZoom(-100.0f),
+	m_nFpsCount(0),
+	m_nFps(0),
+	m_dLastMove(0),
+	m_dFrameTime(0), 
+	m_bShowDesc(TRUE),
+	m_bScreenTooSmall(FALSE),
+	m_State(opZoomIn),
+	m_fFloorPos(0.0f)
+{ }
+
 
 HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 {
@@ -196,7 +197,7 @@ void CSaverWindow::OnInit()
 		//font_base -= 32;
 		dc.SelectFont(oldfont);
 	}
-	srand(GetTickCount());
+	srand(TICK());
 	m_MManager.LoadList();
 	LoadMolecule();
 	return;
@@ -206,7 +207,7 @@ BOOL
 CSaverWindow::LoadMolecule()
 {
 	CFile file;
-	TCHAR *dir = ::_tgetcwd(NULL, 0);
+	std::unique_ptr<TCHAR> dir(::_tgetcwd(NULL, 0));
 	BOOL ok = FALSE;
 	CMoleculeBuilder builder;
 	m_bError = FALSE;
@@ -220,6 +221,7 @@ CSaverWindow::LoadMolecule()
 	m_pMolecule = builder.LoadFromFile(mol);
 	if(m_pMolecule == NULL)
 	{
+		// prepare for drawing error screen
 		this->m_csErrorText.Format(_T("Can't load molecule!\nDirectory: %s\n")
 			_T("This directory should contain folder named 'molecules' with *.pdb files"), dir);
 		m_bError = TRUE;
@@ -227,6 +229,7 @@ CSaverWindow::LoadMolecule()
 	}
 	else
 	{
+		// prepare for drawing molecule
 		m_State = opZoomIn;
 		m_pMolecule->EnableLinks(m_Settings.bShowLinks);
 		m_pMolecule->EnableWire(m_Settings.bWire);
@@ -236,19 +239,17 @@ CSaverWindow::LoadMolecule()
 			m_Blender.SetString(m_pMolecule->GetDescription(), 5);
 		ok = TRUE;
 	}
-	free(dir);
 	return ok;
 }
 
 #define TIMER_FPS 666
 #define TIMER_MOVE 69
-#define TIMER_LOAD 66
 
 BOOL
 CSaverWindow::RunSaver()
 {
 	if(m_Settings.dRunTime !=0)
-		m_StopTime = GetTickCount()+m_Settings.dRunTime*60000;
+		m_StopTime = TICK() + m_Settings.dRunTime * 60000;
 	else
 		m_StopTime = 0;
 
@@ -258,18 +259,17 @@ CSaverWindow::RunSaver()
 	{
 		SetTimer(TIMER_FPS, 1000);
 		//SetTimer(TIMER_MOVE, m_Settings.dMoveDelay);
-		SetTimer(TIMER_MOVE, m_Settings.dMoveDelay);
-		SetTimer(TIMER_LOAD, m_Settings.dShowTime);
+		SetTimer(TIMER_MOVE, 1);
 	}
 	else
 	{
-		SetTimer(TIMER_MOVE, m_Settings.dMoveDelay);
+		SetTimer(TIMER_MOVE, m_Settings.dFrameDelay);
 		ret = FALSE;
 	}
 
   if (m_Settings.bReflection)
     m_fZoom = 0.0f;
-	m_dLastMove = GetTickCount();
+	m_dLastMove = TICK();
   RedrawWindow();
   return ret;
 }
@@ -279,10 +279,9 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 	if(wParam == TIMER_FPS)
 	{
 		// blanks screen after specified amount of time
-		if(m_bTouchExit && m_StopTime && GetTickCount() >= m_StopTime)
+		if(m_bTouchExit && m_StopTime && TICK() >= m_StopTime)
 		{
 			KillTimer(TIMER_FPS);
-			KillTimer(TIMER_LOAD);
 			KillTimer(TIMER_MOVE);
 			m_State = opBlank;
 			if(m_pMolecule)
@@ -291,134 +290,160 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				m_pMolecule = NULL;
 			}
 			//m_Twister.DoFreeRotation();
-			//m_dLastMove= GetTickCount();
+			//m_dLastMove= TICK();
 			RedrawWindow();
 			return 0;
 		}
 		m_nFps = m_nFpsCount;
 		m_nFpsCount = 0;
 	}
-	else if(wParam == TIMER_LOAD && m_State == opRender)
-	{
-		m_State = opZoomOut;
-		if(m_Settings.bAnimateBuild && m_pMolecule)
-			m_pMolecule->InitExplosion(1.0f);
-	}
+	//else if(wParam == TIMER_LOAD && m_State == opRender)
+	//{
+	//	m_State = opZoomOut;
+	//	if(m_Settings.bAnimateBuild && m_pMolecule)
+	//		m_pMolecule->InitExplosion(1.0f);
+	//}
 	else if(wParam == TIMER_MOVE)
 	{
-		DWORD tick = GetTickCount();
+		DWORD tick = TICK();
 		DWORD delta = tick - m_dLastMove;
-		if (delta == 0)
-			delta = 200;
+		m_dLastMove = tick;
+		if (delta == 0) delta = 1;
 		GLfloat dsec = (GLfloat)delta/1000.0f;
-		m_Twister.DoFreeRotation(delta);
-		if(GetTickCount() - m_dLastMove >= m_Settings.dMoveDelay)
-		{		
-			//m_Twister.DoFreeRotation2(delta);
-			m_dLastMove= GetTickCount();
-		}
-		else
+		
+		if (m_pMolecule && m_State == opRender && tick - m_dShowTimeStart >= m_Settings.dShowTime)
 		{
-			m_dLastMove= GetTickCount();
-			RedrawWindow();
-			m_dFrameTime = GetTickCount()-tick;
-			return 0;
+			m_State = opZoomOut;
+			if(m_Settings.bAnimateBuild && m_pMolecule)
+				m_pMolecule->InitExplosion(2.0f);
 		}
+		m_Twister.DoFreeRotation(delta);
+		UpdateFloor(delta);
+		
+		if (TICK() - m_dLastFrameDrawn >= m_Settings.dFrameDelay)
+		{
+			m_dLastFrameDrawn = TICK();
+			RedrawWindow();
+		}
+		
+		//if(tick - m_dLastMove >= m_Settings.dMoveDelay)
+		//{		
+		//	//m_Twister.DoFreeRotation2(delta);
+		//	m_dLastMove = TICK();
+		//}
+		//else
+		//{
+		//	m_dLastMove = TICK();
+		//	RedrawWindow();
+		//	m_dFrameTime = m_dLastMove - tick;
+		//	return 0;
+		//}
+
+		const GLfloat z_rate = 30.0f * dsec,
+							zo_rate = 50.0f * dsec;
+		GLfloat zoom_distance = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
+
+		if (!m_pMolecule) return 0;
+
 		switch(m_State)
 		{
-			case opZoomIn:
-      case opBuilding:
-				if(m_pMolecule == NULL)
-					m_fZoom = -5.0f;
-				else
-				{
-					GLfloat zoom_rate = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
-					if(!m_Settings.bShowLinks)
-						zoom_rate -= 10.0f;
-          if (m_Settings.bReflection)
-          {
-            // when reflection is enabled, we only do a zoom correction here
-            // because new molecule may have different size
-            if (fabs(fabs(m_fZoom) - fabs(zoom_rate)) > 1.0f)
-            {
-							// was 0.2f
-              if (m_fZoom < zoom_rate)
-                m_fZoom += 10.0f * dsec;
-              else
-                m_fZoom -= 10.0f * dsec;
-            }
-          }
-          else
-          {
-            m_fZoom += 10.0f * dsec;
-					  if(m_fZoom > zoom_rate)
-            {
-						  m_fZoom = zoom_rate;
-              m_State = opBuilding;
-            }
-          }
-
-					if(m_Settings.bAnimateBuild)
-					{	
-						if(m_pMolecule->DoImpExplode(dsec))
-							m_State = opRender;
-					}
-					else if(m_fZoom == zoom_rate)
-						m_State = opRender;
-				}
+		default:
+		case opRender:
 			break;
-			case opZoomOut:
-				if(m_pMolecule == NULL)
-					m_fZoom = -10.0f * dsec;
-				else
-				{
-          if (m_Settings.bReflection)
-          {
-            // this is really a zoom-in to the center, it allows atoms to run out of
-            // visible area
-            BOOL ready = TRUE;
-            if (m_fZoom < 0.0f)
-              m_fZoom += 10.0f * dsec;
-            if(m_Settings.bAnimateBuild)
-						  ready = m_pMolecule->DoImpExplode(dsec) && fabs(m_fZoom) < 3.0f;
-            if (ready)
-              LoadMolecule();
-          }
+		case opRenderBegin:
+			m_dShowTimeStart = tick;
+			m_State = opRender;
+			break;
+		case opZoomIn:
+			//GLfloat zoom_distance = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
+			if(!m_Settings.bShowLinks)
+				zoom_distance -= 10.0f;
+      if (m_Settings.bReflection)
+      {
+        // when reflection is enabled, we only do a zoom correction here
+        // because new molecule may have different size
+        if (fabs(fabs(m_fZoom) - fabs(zoom_distance)) > 1.0f)
+        {
+					// was 0.2f
+          if (m_fZoom < zoom_distance)
+            m_fZoom += z_rate;
           else
-          {
-					  m_fZoom -= 3.0f * dsec;
-					  if(m_Settings.bAnimateBuild)
-						  m_pMolecule->DoImpExplode(dsec);
-					  if(m_fZoom < -150.0f)
-					  {
-						  m_fZoom = -150.0f;
-						  LoadMolecule();
-					  }
-          }
-				}
+            m_fZoom -= z_rate;
+        }
+				else
+					m_fZoom = zoom_distance;
+      }
+      else
+			{
+        m_fZoom += z_rate;
+				if(m_fZoom > zoom_distance)
+					m_fZoom = zoom_distance;
+      }
+			if(m_Settings.bAnimateBuild )
+			{
+				// make sure we've reached zoom_distance before state switch
+				if(m_pMolecule->DoImpExplode(dsec) && m_fZoom == zoom_distance)
+					m_State = opRenderBegin;
+			}
+			else if(m_fZoom == zoom_distance)
+				m_State = opRenderBegin;
+			break;
+		case opZoomOut:
+			if(m_pMolecule == NULL)
+				m_fZoom = -10.0f;
+			else
+			{
+        if (m_Settings.bReflection)
+        {
+          // this is really a zoom-in to the center, it allows atoms to run out of
+          // visible area
+          BOOL ready = TRUE;
+          if (m_fZoom < 0.0f)
+            m_fZoom += zo_rate;
+          if(m_Settings.bAnimateBuild)
+						ready = m_pMolecule->DoImpExplode(dsec) && fabs(m_fZoom) < 3.0f;
+          if (ready)
+            LoadMolecule();
+        }
+        else
+        {
+					m_fZoom -= zo_rate;
+					bool ready = FALSE;
+					if(m_Settings.bAnimateBuild)
+						ready = m_pMolecule->DoImpExplode(dsec);
+					if(m_fZoom < -100.0f && ready)
+					{
+						m_fZoom = -100.0f;
+						LoadMolecule();
+					}
+        }
+			}
 		}
-		RedrawWindow();
-		m_dFrameTime = GetTickCount()-tick;		
+		m_dFrameTime = TICK() - tick;		
 	}
 	else
 		bHandled = FALSE;
 	return 0;
 }
 
+void CSaverWindow::UpdateFloor(DWORD delta)
+{
+	m_fFloorPos += 0.1f * delta;
+	if (m_fFloorPos > 360.0f)
+		m_fFloorPos = (m_fFloorPos - 360.0f);
+}
+
 // TODO: promote floor to separate class
 void CSaverWindow::DrawFloor()
 {
-  static GLfloat r = 0.0f;
-  r += 0.1f;
-  if (r > 360.0f) r = (r - 360.0f) + 0.1f;
   glEnable(GL_TEXTURE_2D);
   // draw floor (the mirror)
   GLfloat color[4] = { 0.3f, 0.2f, 0.5f, 0.3f };
   glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
   //glTranslatef(0.0f, 0.0f, 0.0f);
   GLfloat d = 100.0f;
-  //glTranslatef(0.0f, 0.0f, 10.0f*sinf(GetTickCount()));
-  glRotatef(r, 0.0f, 1.0f, 0.0f);
+  //glTranslatef(0.0f, 0.0f, 10.0f*sinf(TICK()));
+  glRotatef(m_fFloorPos, 0.0f, 1.0f, 0.0f);
   glCallList(m_textureFloor);
   glBegin(GL_QUADS);
     glNormal3f(0,1.0f,0);
@@ -516,9 +541,7 @@ void CSaverWindow::OnRender()
 			this->GetClientRect(&rect);
 			CString desc;
 			if(!m_bShowFps)
-			{
 				desc.Format(_T("%s"), m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription()); 
-			}
 			else
 			{
 				desc.Format(_T("%s\nFPS: %3d FTIME: %3d [ms]"), 

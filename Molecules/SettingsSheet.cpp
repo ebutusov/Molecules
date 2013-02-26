@@ -7,10 +7,9 @@ CSettingsSheet::CSettingsSheet(ATL::_U_STRINGorID title, UINT uStartPage, HWND h
 	this->SetTitle(_T("Molecule settings"));
 	m_bModal = FALSE;
 	LoadSettings();
-	m_pgPerformance.m_pPrefs = &m_sPrefs;
-	AddPage(m_pgPerformance);
-	m_pgOptions.m_pPrefs = &m_sPrefs;
+	m_pgPerformance.m_pPrefs = m_pgOptions.m_pPrefs = &m_sPrefs;
 	AddPage(m_pgOptions);
+	AddPage(m_pgPerformance);
 	AddPage(m_pgAbout);
 }
 

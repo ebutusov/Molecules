@@ -15,40 +15,41 @@ class CSaverWindow : public CWindowImpl<CSaverWindow>,
 	public COpenGL<CSaverWindow> //,public CIdleHandler
 {
 private:
-	GLuint font_base;
-	GLuint m_base_list;
-	CMolecule *m_pMolecule;
-	//GLfloat m_fXAngle, m_fYAngle, m_fZAngle;
-	GLfloat m_fZoom;
-	//int m_nMutateFactor;
-	BOOL m_bTouchExit;						// exits when touched (key or mouse)
-	BOOL m_nFps, m_nFpsCount;
-	DWORD m_dFrameTime;
+	GLuint font_base,		
+					m_base_list,	// font lists
+					m_textureFloor;
+					
+	GLfloat m_fZoom, m_fFloorPos;
+	
+	BOOL m_bTouchExit;	// exits when touched (key or mouse)
+	int m_nFps, m_nFpsCount;
+	DWORD m_dFrameTime;	// time it took to render single frame
+	DWORD m_dLastFrameDrawn;
+	DWORD m_dShowTimeStart; // time since start of render state
 	LONG m_lTextHeight;
-	BOOL m_bShowDesc;
-	BOOL m_bScreenTooSmall;
-	BOOL m_bShowFps;
-	BOOL m_bError;
+	BOOL m_bShowDesc, m_bScreenTooSmall, m_bShowFps, m_bError;
 	LPARAM m_paramCoord;
 	BOOL m_bHaveCoord;
 	CString m_csErrorText;
 	DWORD m_dLastMove;
-	CMoleculeList m_MManager;
-	CTwister m_Twister;
-	BOOL LoadMolecule();
-	BOOL LoadPreferences();
-  void DrawFloor();
-
-	typedef enum Oper { opRender, opZoomIn, opZoomOut, opBlank, opBuilding };
-	Oper m_State;
+	CMolecule *m_pMolecule;			// current displayed molecule
+	CMoleculeList m_MManager;		// manages molecule building and loading
+	typedef enum Oper { opRender, opRenderBegin, opZoomIn, opZoomOut, opBlank };
+	Oper m_State;		// rendering state
 	DWORD m_StopTime;
 	SPreferences m_Settings;
 	CStringBlender m_Blender;
-  GLuint m_textureFloor;
+	CTwister m_Twister;						// rotation logic
+	
+	BOOL LoadMolecule();
+	BOOL LoadPreferences();
+  void DrawFloor();
+	void UpdateFloor(DWORD delta);
+
 public:
+
 	DECLARE_WND_CLASS(_T("ScreenSaverClass"))
 	CSaverWindow(void);
-	~CSaverWindow(void);
 
 	void OnInit();
 	void OnRender();
