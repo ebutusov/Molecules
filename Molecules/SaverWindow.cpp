@@ -211,14 +211,18 @@ CSaverWindow::LoadMolecule()
 	BOOL ok = FALSE;
 	CMoleculeBuilder builder;
 	m_bError = FALSE;
-
-	LPCTSTR mol = m_MManager.GetRandomMolecule();
+	
+	// free existing molecule if present
 	if(m_pMolecule)
 	{
 		delete m_pMolecule;
 		m_pMolecule = NULL;
 	}
-	m_pMolecule = builder.LoadFromFile(mol);
+	
+	// select new molecule to load
+	LPCTSTR mol = m_MManager.GetRandomMolecule();
+	if (mol)
+		m_pMolecule = builder.LoadFromFile(mol);
 	if(m_pMolecule == NULL)
 	{
 		// prepare for drawing error screen
@@ -325,26 +329,13 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 			m_dLastFrameDrawn = TICK();
 			RedrawWindow();
 		}
-		
-		//if(tick - m_dLastMove >= m_Settings.dMoveDelay)
-		//{		
-		//	//m_Twister.DoFreeRotation2(delta);
-		//	m_dLastMove = TICK();
-		//}
-		//else
-		//{
-		//	m_dLastMove = TICK();
-		//	RedrawWindow();
-		//	m_dFrameTime = m_dLastMove - tick;
-		//	return 0;
-		//}
-
-		const GLfloat z_rate = 30.0f * dsec,
-							zo_rate = 50.0f * dsec;
-		GLfloat zoom_distance = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
 
 		if (!m_pMolecule) return 0;
 
+		const GLfloat z_rate = 10.0f * dsec,
+							zo_rate = 30.0f * dsec;
+		GLfloat zoom_distance = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
+		
 		switch(m_State)
 		{
 		default:
@@ -428,7 +419,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 
 void CSaverWindow::UpdateFloor(DWORD delta)
 {
-	m_fFloorPos += 0.1f * delta;
+	m_fFloorPos += 0.01f * delta;
 	if (m_fFloorPos > 360.0f)
 		m_fFloorPos = (m_fFloorPos - 360.0f);
 }
@@ -497,9 +488,6 @@ void CSaverWindow::OnRender()
         glScalef(1.0f, -1.0, 1.0f); // scale y axis  
         glTranslatef(0.0f, dim/2+0.8f, 0.0f);
 				glMultMatrixf(matrix);
-				//glRotatef(x, 1.0f, 0.0f, 0.0f);
-				//glRotatef(y, 0.0f, 1.0f, 0.0f);	
-        //glRotatef(z, 0.0f, 0.0f, 1.0f);
 	      glTranslatef(tx, ty, tz);
         m_pMolecule->Draw();
       glPopMatrix();
@@ -519,18 +507,12 @@ void CSaverWindow::OnRender()
       glPopMatrix();
     }
 
-    // xxx dlaczego w ten sposob (translate - rotate - translate) ???
-		/* glTranslatef(0.0f, dim/2+0.8f, 0.0f);
-    glRotatef(y, 0.0f, 1.0f, 0.0f);	
-		glRotatef(x, 1.0f, 0.0f, 0.0f);
-		glRotatef(z, 0.0f, 0.0f, 1.0f);
-		glTranslatef(tx, ty, tz);*/
 		glTranslatef(0.0f, dim/2+0.8f, 0.0f);	// rotate aroud this origin ...
 		glMultMatrixf(matrix);
 		//glRotatef(x, 1.0f, 0.0f, 0.0f);
 		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
 		//glRotatef(z, 0.0f, 0.0f, 1.0f);				// with these angles ...
-		glTranslatef(tx, ty, tz);							// object placed here
+		glTranslatef(tx, ty, tz);							// object's center (translates to the center of molecule)
     
 		m_pMolecule->Draw();
 
@@ -560,11 +542,6 @@ void CSaverWindow::OnRender()
 		glColor3f(1.0f, 0.0f, 0.0f);
 		glTranslatef(0.0f, 0.0f, -20.0f);
 		glMultMatrixf(matrix);
-		//GLfloat x, y, z;
-		//m_Twister.GetRotation(x, y, z);
-		//glRotatef(x, 1.0f, 0.0f, 0.0f);
-		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
-		//glRotatef(z, 0.0f, 0.0f, 1.0f);
 		static GLfloat tcs[4] = { 1.0f, 0.2f, 0.4f, 1.0f };
 		glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, tcs);
 		CGLDrawHelper::DrawTube(-10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);

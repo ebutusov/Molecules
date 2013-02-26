@@ -1,12 +1,6 @@
 #pragma once
-//#include "Archive.h" // not used, settings are stored in registry
 #include "Registry.h"
 
-//////////////////////////////////////////////////
-// Preferences data storage
-//////////////////////////////////////////////////
-
-// #define SETTINGS_FILE "settings.bin"
 #define SETTINGS_KEY "Software\\MatrixInc\\Molecules\\Settings"
 
 typedef struct __PREFS
@@ -31,9 +25,9 @@ typedef struct __PREFS
     CRegistry reg;
     reg.SetRootKey(HKEY_CURRENT_USER);
     reg.SetKey(SETTINGS_KEY, TRUE);
-    fMaxSpeed = (GLfloat)reg.ReadFloat("MaxSpeed", 3.0f);
+    fMaxSpeed = (GLfloat)reg.ReadFloat("MaxSpeed", 1.5f);
     dShowTime = reg.ReadDword("ShowTime", 30000);
-    dFrameDelay = reg.ReadDword("FrameDelay", 30);
+    dFrameDelay = reg.ReadDword("FrameDelay", 25);
     bShowDesc = reg.ReadBool("ShowDesc", TRUE);
     bShowFPS = reg.ReadBool("ShowFPS", FALSE);
     bWire = reg.ReadBool("Wire", FALSE);
@@ -68,57 +62,5 @@ typedef struct __PREFS
     }
     else return FALSE;
   }
-
-	//void Serialize(CXArchive &ar)
-	//{
-	//	const int arch_version = 5; // v5 - 07.04.2008 - reflection
-	//	if(ar.IsStoring())
-	//	{
-	//		ar << arch_version;
-	//		ar << (float)fXspeed;
-	//		ar << (float)fYspeed;
-	//		ar << (float)fZspeed;
-	//		ar << dShowTime;
-	//		ar << dMoveDelay;
-	//		ar << ShowDesc;
-	//		ar << ShowFPS;
-	//		ar << IsWire;
-	//		ar << ShowLinks;
-	//		ar << AnimateBuild;	// v2
-	//		ar << dRunTime;
-	//		ar << bTeleType;
- //     ar << bReflection;
-	//	}
-	//	else
-	//	{
-	//		int version = 0;
-	//		ar >> version;
-	//		ar >> fXspeed;
-	//		ar >> fYspeed;
-	//		ar >> fZspeed;
-	//		ar >> dShowTime;
-	//		ar >> dMoveDelay;
-	//		ar >> ShowDesc;
-	//		ar >> ShowFPS;
-	//		ar >> IsWire;
-	//		ar >> ShowLinks;
-	//		if(version >= 2)
-	//			ar >> AnimateBuild;
-	//		else
-	//			AnimateBuild = TRUE;
-	//		if(version >= 3)
-	//			ar >> dRunTime;
-	//		else
-	//			dRunTime = 0;
-	//		if(version >= 4)
-	//			ar >> bTeleType;
-	//		else
-	//			bTeleType = TRUE;
- //     if (version >= 5)
- //       ar >> bReflection;
- //     else
- //       bReflection = TRUE;
-	//	}
-	//}
 
 } SPreferences;

@@ -49,7 +49,7 @@ void
 CSetPerformPg::UpdateControls()
 {
 	m_trackDelay.SetRange(0, 50, TRUE);
-	m_maxSpeed.SetRange(0, 500, TRUE);
+	m_maxSpeed.SetRange(0, 300, TRUE);
 	m_maxSpeed.SetTicFreq(100);
 	m_maxSpeed.SetPos((int)(m_pPrefs->fMaxSpeed*100));
 	m_trackDelay.SetPos(m_pPrefs->dFrameDelay);

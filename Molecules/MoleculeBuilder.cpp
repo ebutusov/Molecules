@@ -51,6 +51,7 @@ TCHAR* ReadFile(LPCTSTR filename)
 CMolecule*
 CMoleculeBuilder::LoadFromFile(LPCTSTR filename)
 {
+	ATLASSERT(filename != NULL);
 	TCHAR *fptr = ReadFile(filename);
 	std::unique_ptr<TCHAR[]> ufptr(fptr);
 	std::unique_ptr<CMolecule> mol(new CMolecule());
