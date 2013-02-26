@@ -8,51 +8,49 @@ CMoleculeList::CMoleculeList(void)
 
 CMoleculeList::~CMoleculeList(void)
 {
-	if(m_Molecules.GetCount() > 0)
-		m_Molecules.RemoveAll();
+	ClearList();
 }
 
 BOOL
 CMoleculeList::LoadList()
 {
-	ProcessDir(_T("molecules"));	// moge tak, bo ustawilem katalog roboczy
-	return m_Molecules.GetCount()>0 ? true : false;
+	ProcessDir(_T("molecules"));	// this works because of changed working directory
+	return m_Molecules.size() > 0 ? true : false;
 }
 
 void
 CMoleculeList::ClearList()
 {
-	for(size_t i=0;i<m_Molecules.GetCount();i++)
-		delete m_Molecules.GetAt(i);
-
-	m_Molecules.RemoveAll();
+	for (auto it=std::begin(m_Molecules);it != std::end(m_Molecules); ++it)
+		delete *it;
+	m_Molecules.clear();
 	m_nCurrentPosition = -1;
 }
 
 LPCTSTR
 CMoleculeList::GetNextMolecule()
 {
-	if(m_Molecules.GetCount() == 0)
+	if(m_Molecules.size() == 0)
 		return NULL;
-	if(m_nCurrentPosition < m_Molecules.GetCount()-1)
-		return m_Molecules.GetAt(++m_nCurrentPosition);
+	if(m_nCurrentPosition < m_Molecules.size() - 1)
+		return m_Molecules[++m_nCurrentPosition];
 	else
 	{
 		m_nCurrentPosition = 0;
-		return m_Molecules.GetAt(0);
+		return m_Molecules[0];
 	}
 }
 
 LPCTSTR
 CMoleculeList::GetRandomMolecule()
 {
-	if(m_Molecules.GetCount() == 0)
+	if(m_Molecules.size() == 0)
 		return NULL;
-	if(m_Molecules.GetCount() == 1)
-		return m_Molecules.GetAt(0);
+	if(m_Molecules.size() == 1)
+		return m_Molecules[0];
 	srand(GetTickCount());
-	m_nCurrentPosition = rand()%(m_Molecules.GetCount());
-	return m_Molecules.GetAt(m_nCurrentPosition);
+	m_nCurrentPosition = rand()%(m_Molecules.size());
+	return m_Molecules[m_nCurrentPosition];
 }
 
 void
@@ -77,7 +75,7 @@ CMoleculeList::ProcessDir(LPCTSTR dir)
 				{
 					LPTSTR file = new TCHAR[len+1];
 					_tcsncpy_s(file, len+1, finder.GetFilePath(), len);
-					this->m_Molecules.Add(file);		
+					this->m_Molecules.push_back(file);		
 				}
 			}
 		} while(finder.FindNextFile());

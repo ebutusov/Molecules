@@ -32,6 +32,7 @@ public:
 	GLfloat GetSize() { return m_Size; } 
   BOOL GetSkip() { return m_bSkip; }
   void SetSkip(BOOL skip) { m_bSkip = skip; }
+	static void SizeLimits(float &max_size, float &min_size);
 public:
 	virtual ~CAtom() {};
 private:

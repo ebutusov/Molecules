@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "Molecule.h"
+#include <vector>
 
 class CMoleculeList
 {
@@ -16,5 +17,5 @@ public:
 private:
 	size_t m_nCurrentPosition;
 	void ProcessDir(LPCTSTR dir);
-	CAtlArray<LPCTSTR> m_Molecules;
+	std::vector<LPCTSTR> m_Molecules;
 };

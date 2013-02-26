@@ -194,12 +194,15 @@ CMolecule::PutLink(int from, int to)
 void
 CMolecule::RescaleAtoms()
 {
+	GLfloat max_atom, min_atom;
+	CAtom::SizeLimits(max_atom, min_atom);
+
 	FOREACH_ATOM(atom)
 		GLfloat bot = 0.4f;
     GLfloat top = 0.6f;
-    GLfloat min = 1.17f;
-    GLfloat max = 1.80f;
-    GLfloat ratio = (atom->GetSize() - min) / (max - min);
+    //GLfloat min = 1.17f;
+    //GLfloat max = 1.80f;
+    GLfloat ratio = (atom->GetSize() - min_atom) / (max_atom - min_atom);
     atom->SetScaledSize(bot + (ratio * (top - bot)));
 	END_FA
 }
@@ -247,7 +250,6 @@ CMolecule::CalculateBoundingBox()
 	y1 = y2 = firstAtom->GetY();
 	z1 = z2 = firstAtom->GetZ();
 
-  
   // find min point
   FOREACH_ATOM(atom)
     if(atom->GetX() < x1) x1 = atom->GetX();
@@ -308,6 +310,7 @@ CMolecule::CalculateBoundingBox()
 	size = size > m_Depth ? size : m_Depth;
 	m_Scale = size;	
 
+	// center around the origin (all axes positive, so we need -)
 	TRANSLATIONS[0] = -(x1+m_Width/2);	// X translation
 	TRANSLATIONS[1] = -(y1+m_Height/2);	// Y translation
 	TRANSLATIONS[2] = -(z1+m_Depth/2);	// Z translation

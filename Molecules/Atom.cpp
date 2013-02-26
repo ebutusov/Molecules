@@ -166,6 +166,21 @@ CAtom::NearToOut(GLfloat tolerance)
 		return FALSE;
 }
 
+void CAtom::SizeLimits(float &max_size, float &min_size)
+{
+	max_size = 100.0f;
+	atom_defaults *p = m_AtomDefaults;
+	max_size = min_size = p->size;
+	int i = 0;
+	while (i++ < _countof(m_AtomDefaults))
+	{
+		min_size = min(p->size, min_size);
+		max_size = max(p->size, max_size);
+		++p;
+	}
+}
+
+
 BOOL
 CAtom::LoadDefaults()
 {
