@@ -16,9 +16,10 @@ public:
 	void EnableLinks(bool enable);
 	void EnableWire(bool enable);
 	void EnableLabels(bool enable);
-
+	void SetFontList(GLuint list);	// for labeling atoms
 	void SetDescription(LPTSTR desc);
 	int GetAtomsCount();
+	const CString& GetFormula();
 	const CString& GetDescription();
 	GLfloat GetMaxDimension();
 	void CalculateBoundingBox();
@@ -26,13 +27,15 @@ public:
 	void CalculateOutValues(GLfloat factor);
 	void InitExplosion(GLfloat dist_factor = 2.0f);
 	void InitImplosion(GLfloat dist_factor = 2.0f);
-
+	void GenerateFormula();
 	bool DoImpExplode(GLfloat delta);
 	typedef enum DrawingMode { dmNormal, dmExplode, dmImplode };
 
 	virtual ~CMolecule(void);
 
 protected:
+	GLuint m_font_base;
+	CString m_Formula;
 	DrawingMode m_DrawMode;
 	bool m_bDrawLinks;
 	bool m_bDrawLabels;

@@ -10,7 +10,7 @@ public:
 	void SetColor(GLfloat r, GLfloat g, GLfloat b);
 	void GetColor(GLfloat *rColor);
 	BOOL SetName(TCHAR *name);
-	LPCTSTR GetShortName();
+	LPCTSTR GetName();
 	void SetScaledSize(GLfloat size);
 	GLfloat GetScaledSize();
 	GLfloat GetX() { return m_XCoord; }
@@ -43,7 +43,7 @@ private:
 	CAtom(CAtom &&other);
 	CAtom& operator=(CAtom &&other);
 
-	TCHAR m_Name[4];
+	TCHAR m_Name[5];
 	TCHAR m_FullName[20];
 
 	BOOL m_IsOnTheMove;

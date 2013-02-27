@@ -3,6 +3,7 @@
 #include "Molecule.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <algorithm>
 
 #define MAX(a, b) a > b ? a : b;
 
@@ -71,13 +72,10 @@ DrawTubeM(GLfloat x1, GLfloat y1, GLfloat z1,
 GLfloat CMolecule::LINKCOLOR[4] = { 0.3f, 0.3f, 0.2f, 1.0f };
 
 CMolecule::CMolecule(void) 
-	: m_Description(_T("UNKNOWN"))
+	: m_Description(_T("UNKNOWN")),
+	m_bDrawLabels(FALSE), m_bWireMode(FALSE), m_DrawMode(dmNormal),
+	m_dl(0), m_bFromDL(FALSE), m_font_base(0)
 {
-	m_bDrawLinks = FALSE;
-	m_bWireMode = FALSE;
-	m_DrawMode = dmNormal;
-	m_dl = 0;
-	m_bFromDL = FALSE;
 }
 
 CMolecule::~CMolecule(void)
@@ -105,6 +103,11 @@ const CString&
 CMolecule::GetDescription()
 {
 	return m_Description;
+}
+
+const CString& CMolecule::GetFormula()
+{
+	return m_Formula;
 }
 
 int
@@ -136,6 +139,11 @@ CMolecule::EnableWire(bool enable)
 void CMolecule::EnableLabels(bool enable)
 {
 	m_bDrawLabels = enable;
+}
+
+void CMolecule::SetFontList(GLuint list)
+{
+	m_font_base = list;
 }
 
 void
@@ -433,20 +441,63 @@ CMolecule::DoImpExplode(GLfloat delta)
 	return all_atoms_ready;
 }
 
+#ifdef UNICODE
+typedef std::wstring tstring;
+#else
+typedef std::string tstring;
+#endif
+
+template <typename T1, typename T2>
+struct less_comparer
+{
+	typedef std::pair<T1, T2> PairType;
+	bool operator() (PairType const &a, PairType const &b)
+	{
+		// true if a < b
+		// put C atoms first, then H, then the rest in alphabetical order
+		if (!_tcscmp(a.first.c_str(),_T("C"))) return true;
+		if (!_tcscmp(b.first.c_str(), _T("C"))) return false;
+		if (!_tcscmp(a.first.c_str(), _T("H"))) return true;
+		if (!_tcscmp(b.first.c_str(), _T("H"))) return false;
+		return _tcscmp(a.first.c_str(), b.first.c_str()) < 0;
+	}
+};
+
+void CMolecule::GenerateFormula()
+{
+	using namespace std;
+
+	map<tstring, int> counts;
+	FOREACH_ATOM(atom)
+		counts[atom->GetName()]++;
+	END_FA
+	
+	if (counts.size() > 20) // too many unique atoms
+		return;
+
+	vector<pair<tstring, int>> mcopy(begin(counts), end(counts));
+	sort(begin(mcopy), end(mcopy), less_comparer<tstring, int>());
+	for(auto it=mcopy.begin();it!=mcopy.end();++it)
+	{
+		CString f;
+		f.Format(_T("%s(%d)"), it->first.c_str(), it->second);
+		m_Formula += f;
+	}
+}
+
 void CMolecule::DrawLabels()
 {
 	FOREACH_ATOM(atom)
-		 if (atom->GetSkip())
+		if (atom->GetSkip())
       continue;
 		GLfloat color[4];
 		atom->GetColor(color);
-		color[3] = 1.0f;
 		//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
 		glColor3fv(color);
 		GLfloat size = m_bDrawLinks ? atom->GetScaledSize() : atom->GetSize();
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
-		CGLDrawHelper::DrawLabel(x, y, z, 2.0f* size, atom->GetShortName());
+		CGLDrawHelper::DrawLabel(m_font_base, x, y, z, 2.0f* size, atom->GetName());
 	END_FA
 }
 

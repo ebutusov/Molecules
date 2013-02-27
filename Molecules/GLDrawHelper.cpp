@@ -4,25 +4,9 @@
 #include <math.h>
 #include <atlmisc.h>
 #include <memory>
-
 #include "GLDrawHelper.h"
 
 typedef struct { GLfloat x, y, z; } XYZ;
-
-DWORD CGLDrawHelper::m_font_base = 0;
-
-void CGLDrawHelper::InitFonts(DWORD font_base)
-{
-	ATLASSERT(m_font_base == 0);
-	m_font_base = font_base;
-}
-
-void CGLDrawHelper::FreeFonts()
-{
-	ATLASSERT(m_font_base != 0);
-	::glDeleteLists(m_font_base, 255);
-	m_font_base = 0;
-}
 
 void
 CGLDrawHelper::DrawSphere(int stacks, int slices, BOOL wire)
@@ -237,9 +221,11 @@ CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
 	(by Jamie Zawinski)
  */
 
-void CGLDrawHelper::DrawLabel(GLfloat x, GLfloat y, GLfloat z, GLfloat size, LPCTSTR label)
+void CGLDrawHelper::DrawLabel(GLuint font_base, GLfloat x, GLfloat y, GLfloat z, 
+															GLfloat size, LPCTSTR label)
 {
 	GLfloat m[4][4];
+
 	glPushAttrib(GL_LIGHTING_BIT);
 	glDisable(GL_LIGHTING);
 	glPushMatrix();
@@ -263,15 +249,15 @@ void CGLDrawHelper::DrawLabel(GLfloat x, GLfloat y, GLfloat z, GLfloat size, LPC
             NULL);*/
 
   for (int j = 0; j < _tcslen(label); j++)
-    glCallList (m_font_base + (int)(label[j]));
+    glCallList (font_base + (int)(label[j]));
 
   glPopMatrix();
 	glPopAttrib();
 }
 
-void
-CGLDrawHelper::DrawString(int window_width, int window_height, GLfloat x, GLfloat y, LPTSTR string,
-													int text_height)
+void CGLDrawHelper::DrawString(GLuint font_base, int window_width, 
+															 int window_height,GLfloat x, GLfloat y, 
+															 LPCTSTR string, int text_height)
 {
 	int copy_len = _tcslen(string);
 	// nvoglnt seems to be buggy in glCallLists
@@ -308,7 +294,7 @@ CGLDrawHelper::DrawString(int window_width, int window_height, GLfloat x, GLfloa
 					glRasterPos2f(x, y_pos);
 					int len = _tcslen(sp);
 					glPushAttrib(GL_LIST_BIT);
-					glListBase(m_font_base);
+					glListBase(font_base);
 					// XXX CHECK THIS!
 #ifdef UNICODE
 					glCallLists(len, GL_UNSIGNED_SHORT, sp);
@@ -316,18 +302,6 @@ CGLDrawHelper::DrawString(int window_width, int window_height, GLfloat x, GLfloa
 					glCallLists(len, GL_UNSIGNED_BYTE, sp);
 #endif
 					glPopAttrib();
-					/*TCHAR *minuses = new TCHAR[len+1];
-					TCHAR *m = minuses;
-					for(int i=0;i<len;i++)
-						*m++ = '-';
-					*m = '\0';
-					y_pos -= text_height;
-					glRasterPos2f(x, y_pos);
-					glPushAttrib(GL_LIST_BIT);
-					glListBase(font_dlist);
-					glCallLists(len, GL_UNSIGNED_BYTE, minuses);
-					glPopAttrib();
-					delete [] minuses;*/
 					y_pos -= text_height;
 					sp = _tcstok_s(NULL, delims, &context);
 				}

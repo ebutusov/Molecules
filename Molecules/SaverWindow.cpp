@@ -27,10 +27,9 @@ CSaverWindow::CSaverWindow() :
 { }
 
 
-HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, BOOL preview, LPRECT lprc)
+HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
 {
 	m_bTouchExit = bExitOnTouch;
-	m_bPreview = preview;
 	RECT rc;
 	DWORD dwStyle = WS_CHILD;
 	DWORD dwExStyle = WS_EX_TOOLWINDOW;
@@ -89,8 +88,8 @@ LRESULT CSaverWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
 LRESULT CSaverWindow::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-  ::glDeleteLists(m_textureFloor, 1);
-	CGLDrawHelper::FreeFonts();
+  glDeleteLists(m_textureFloor, 1);
+	glDeleteLists(m_font_base, 255);
 	::PostQuitMessage(0);
 	return 0;
 }
@@ -148,7 +147,9 @@ void CSaverWindow::OnInit()
 {
 	/*CMessageLoop *loop = _Module.GetMessageLoop();
 	loop->AddIdleHandler(this);*/
+
 	glClearColor(0.000f, 0.000f, 0.000f, 1.0f); //Background color
+
 	// Activate lighting and a light source
 	glMatrixMode(GL_MODELVIEW);
 	glMatrixMode(GL_PROJECTION);
@@ -193,10 +194,8 @@ void CSaverWindow::OnInit()
 		if(rc.right-rc.left<m_lTextHeight*10)
 			m_bScreenTooSmall = TRUE;
 
-		font_base = 1000; // ot tak
-		wglUseFontBitmaps(dc.m_hDC, 0, 255, font_base);
-		//wglUseFontBitmaps(dc.m_hDC, 32, 96, font_base);
-		CGLDrawHelper::InitFonts(font_base);
+		m_font_base = 1000;
+		wglUseFontBitmaps(dc.m_hDC, 0, 255, m_font_base);
 		dc.SelectFont(oldfont);
 	}
 	srand(TICK());
@@ -238,12 +237,17 @@ CSaverWindow::LoadMolecule()
 		// prepare for drawing molecule
 		m_State = opZoomIn;
 		m_pMolecule->EnableLinks(m_Settings.bShowLinks);
-		m_pMolecule->EnableLabels(m_Settings.bShowLabels && !m_bPreview);
+		m_pMolecule->EnableLabels(m_Settings.bShowLabels && !m_bScreenTooSmall);
 		m_pMolecule->EnableWire(m_Settings.bWire);
+		m_pMolecule->GenerateFormula();
+		m_pMolecule->SetFontList(m_font_base);
 		if(m_Settings.bAnimateBuild)
 			m_pMolecule->InitImplosion(2.0f);
+		
+		m_headerText.Format(_T("%s"), m_pMolecule->GetDescription());
 		if(m_Settings.bTeleType)
-			m_Blender.SetString(m_pMolecule->GetDescription(), 5);
+			m_Blender.SetString(m_headerText, 5);
+		
 		ok = TRUE;
 	}
 	return ok;
@@ -265,7 +269,6 @@ CSaverWindow::RunSaver()
   if(m_pMolecule)
 	{
 		SetTimer(TIMER_FPS, 1000);
-		//SetTimer(TIMER_MOVE, m_Settings.dMoveDelay);
 		SetTimer(TIMER_MOVE, 1);
 	}
 	else
@@ -296,20 +299,12 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				delete m_pMolecule;
 				m_pMolecule = NULL;
 			}
-			//m_Twister.DoFreeRotation();
-			//m_dLastMove= TICK();
 			RedrawWindow();
 			return 0;
 		}
 		m_nFps = m_nFpsCount;
 		m_nFpsCount = 0;
 	}
-	//else if(wParam == TIMER_LOAD && m_State == opRender)
-	//{
-	//	m_State = opZoomOut;
-	//	if(m_Settings.bAnimateBuild && m_pMolecule)
-	//		m_pMolecule->InitExplosion(1.0f);
-	//}
 	else if(wParam == TIMER_MOVE)
 	{
 		DWORD tick = TICK();
@@ -352,6 +347,10 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 			//GLfloat zoom_distance = (GLfloat)-10.0f-m_pMolecule->GetMaxDimension(); // xxx
 			if(!m_Settings.bShowLinks)
 				zoom_distance -= 10.0f;
+
+			if (m_Settings.bShowLabels && !m_bScreenTooSmall)
+				m_pMolecule->EnableLabels(fabs(m_fZoom - zoom_distance) < 10.0f); 
+
       if (m_Settings.bReflection)
       {
         // when reflection is enabled, we only do a zoom correction here
@@ -453,13 +452,10 @@ void CSaverWindow::OnRender()
 {
   BOOL mirror = m_Settings.bReflection;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear buffers
-	 // plane clip
-  glLoadIdentity(); // Load identity matrix
+  glLoadIdentity();
   if(m_pMolecule)
 	{
-    //glRotatef(-20.0f, 1.0f, 0.0f, 0.0f);
     GLfloat zoom = mirror ? m_fZoom*2.0f : m_fZoom;
-    //glTranslatef(0.0f, 0.0f, m_fZoom);
     m_nFpsCount++;
     GLfloat dim = m_pMolecule->GetMaxDimension();
     GLfloat tx, ty, tz;
@@ -467,7 +463,10 @@ void CSaverWindow::OnRender()
 	  double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
 		GLfloat matrix[16];
 		m_Twister.GetRotationMatrix(matrix);
-    gluLookAt(-tx, -(ty-3.0f), zoom, 0, -ty, 0, 0, 1, 0);
+
+		// lift eye a little when showing reflected molecule
+		GLfloat eye_corr = mirror ? 2.0f : 0.0f;
+    gluLookAt(-tx, -ty + eye_corr, zoom, 0, -ty, 0, 0, 1, 0);
 
     if (mirror)
     {
@@ -483,7 +482,7 @@ void CSaverWindow::OnRender()
       glStencilFunc(GL_EQUAL, 1, 1);
       glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);*/
      
-     //draw reflected molecule (hide when zooming)
+			// draw reflected molecule
      
       glEnable(GL_CLIP_PLANE0);
       glClipPlane(GL_CLIP_PLANE0, eqr);
@@ -492,7 +491,15 @@ void CSaverWindow::OnRender()
         glTranslatef(0.0f, dim/2+0.8f, 0.0f);
 				glMultMatrixf(matrix);
 	      glTranslatef(tx, ty, tz);
-        m_pMolecule->Draw();
+        if (m_Settings.bShowLabels && !m_bScreenTooSmall)
+				{
+					// don't draw labels in reflected molecule
+					m_pMolecule->EnableLabels(false);
+					m_pMolecule->Draw();
+					m_pMolecule->EnableLabels(true);
+				}
+				else
+					m_pMolecule->Draw();
       glPopMatrix();
       glDisable(GL_CLIP_PLANE0);
       glDisable(GL_STENCIL_TEST);
@@ -526,15 +533,20 @@ void CSaverWindow::OnRender()
 			this->GetClientRect(&rect);
 			CString desc;
 			if(!m_bShowFps)
-				desc.Format(_T("%s"), m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription()); 
+				desc.Format(_T("%s"), 
+					m_Settings.bTeleType? m_Blender.DoBlend() : m_headerText); 
 			else
 			{
 				desc.Format(_T("%s\nFPS: %3d FTIME: %3d [ms]"), 
-					m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription(), m_nFps, m_dFrameTime);
+					m_Settings.bTeleType? m_Blender.DoBlend() : m_headerText,
+					m_nFps, m_dFrameTime);
 			}
-			CGLDrawHelper::DrawString(rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
-				(LPTSTR)(LPCTSTR)desc, m_lTextHeight);
-		}   
+			CGLDrawHelper::DrawString(m_font_base, rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
+				desc, m_lTextHeight);
+			glColor3f(0.4f, 0.4f, 0.4f);
+			CGLDrawHelper::DrawString(m_font_base, rect.right, rect.bottom, 
+				0.0f, 0.0f + m_lTextHeight/2.0f, m_pMolecule->GetFormula(), m_lTextHeight);
+		}
 	}
 	else if(m_bError)
 	{
@@ -550,7 +562,7 @@ void CSaverWindow::OnRender()
 		CGLDrawHelper::DrawTube(-10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);
 		CGLDrawHelper::DrawTube(0.0f, -10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);
 		if(!m_bScreenTooSmall)
-			CGLDrawHelper::DrawString(rect.right, rect.bottom,
+			CGLDrawHelper::DrawString(m_font_base, rect.right, rect.bottom,
 				0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight, (LPTSTR)(LPCTSTR)m_csErrorText, m_lTextHeight);
 	}
 	glFlush();

@@ -4,13 +4,14 @@
 
 CAtom::atom_defaults CAtom::m_AtomDefaults[] = 
 {
-	{ _T("H"), _T("Hydrogen"), 1.17f, { 0.7f, 0.7f, 0.7f, 1.0f } },	// white
-	{ _T("C"), _T("Carbon"), 1.75f, { 0.5f, 0.5f, 0.5f, 1.0f } },		// gray
-	{ _T("CA"), _T("Calcium"), 1.80f, { 0.0f, 0.0f, 1.0f, 1.0f } },	// blue
-	{ _T("N"), _T("Nitrogen"), 1.55f, { 0.5f, 0.0f, 1.0f, 1.0f } },	// violet ???
-	{ _T("O"), _T("Oxygen"), 1.40f, { 1.0f, 0.0f, 0.0f, 1.0f } },		// red
-	{ _T("P"), _T("Phosphor"), 1.28f, { 0.8f, 0.2f, 0.7f } },				// purple ???
-	{ _T("S"), _T("Sulfur"),   1.80f, { 1.0f, 0.9f, 0.0f } }					// yellow ???
+	{ _T("H"),	_T("Hydrogen"), 1.17f, /* white */ { 0.7f, 0.7f, 0.7f, 1.0f } },
+	{ _T("C"),	_T("Carbon"), 1.75f, /* gray */ { 0.5f, 0.5f, 0.5f, 1.0f } },
+	{ _T("CA"),	_T("Calcium"), 1.80f, /* blue */ { 0.0f, 0.0f, 1.0f, 1.0f } },
+	{ _T("N"),	_T("Nitrogen"), 1.55f, /* violet */ { 0.5f, 0.0f, 1.0f, 1.0f } },
+	{ _T("O"),	_T("Oxygen"), 1.40f, /* red */ { 1.0f, 0.0f, 0.0f, 1.0f } },
+	{ _T("P"),	_T("Phosphor"), 1.28f, /* purple */ { 0.8f, 0.2f, 0.7f, 1.0f } },
+	{ _T("S"),	_T("Sulfur"),   1.80f, /* yellow */ { 1.0f, 0.9f, 0.0f, 1.0f } },
+	{ _T("Cl"),	_T("Chlorine"), 0.97f, /* light green */ { 0.2f, 0.8f, 0.2f, 1.0f } }
 };
 
 CAtom::CAtom(TCHAR *name)
@@ -19,8 +20,9 @@ CAtom::CAtom(TCHAR *name)
 	m_YCoord = 0.0f;
 	m_ZCoord = 0.0f;
 	m_ScaledSize = 1.0f;
-	_tcsncpy_s(&m_Name[0], 4, name, 3);
+	_tcsncpy_s(m_Name, name, 3);
   m_bSkip = FALSE;
+	memset(m_FullName, 0, sizeof(m_FullName));
 	// TODO: check if defauts were loaded, if not, remove this atom
 	// and its links from the molecule
 	LoadDefaults();
@@ -34,19 +36,19 @@ CAtom::CAtom(void)
 	m_ZCoord = 0.0f;
   m_bSkip = FALSE;
 	m_ScaledSize = 1.0f;
-	_tcsncpy_s(m_Name, 4, _T("?"), 3);
+	_tcsncpy_s(m_Name, _T("?"), 3);
 	_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 }
 
 BOOL
 CAtom::SetName(TCHAR *name)
 {
-	_tcsncpy_s(m_Name, 4, name, 3);
+	_tcsncpy_s(m_Name, name, 3);
 	return LoadDefaults();
 }
 
 LPCTSTR
-CAtom::GetShortName()
+CAtom::GetName()
 {
 	return m_Name;
 }
@@ -190,8 +192,12 @@ void CAtom::SizeLimits(float &max_size, float &min_size)
 BOOL
 CAtom::LoadDefaults()
 {
-	if(m_Name == NULL || _tcslen(m_Name) == 0)
+	int len = _tcslen(m_Name);
+	if(len == 0)
+	{
+		_tcsncpy_s(m_Name, _T("???"), 3);
 		return FALSE;
+	}
 
 	BOOL found = FALSE;
 	for(int i=0;i<_countof(m_AtomDefaults);i++)
@@ -211,7 +217,9 @@ CAtom::LoadDefaults()
 	}
 	if(!found)
 	{
-		_tcsncpy_s(m_Name, 4, _T("?"), 3);
+		if (len < 4)
+			_tcscat_s(m_Name, _T("*")); 
+		//_tcsncpy_s(m_Name, 4, _T("?"), 3);
 		_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 		m_Size = 1.0f;
 		m_ColorR = 0.0f;

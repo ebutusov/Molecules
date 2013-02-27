@@ -1,16 +1,13 @@
 #pragma once
 #include <atlopengl.h>
+#include <map>
+#include <string>
 
 class CGLDrawHelper
 {
 private:
 	static void DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire);
-	static DWORD m_font_base;
-
 public:
-	static void InitFonts(DWORD font_base);
-	static void FreeFonts();
-
 	static void DrawSphere(int stacks, int slices, BOOL wire);
 
 	static void DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
@@ -18,12 +15,12 @@ public:
 			GLfloat diameter, GLfloat cap_size,
 				int faces, BOOL smooth, BOOL caps_p, BOOL wire);
 
-	static void CGLDrawHelper::DrawLabel(
+	static void CGLDrawHelper::DrawLabel(GLuint font_base,
 		GLfloat x, GLfloat y, GLfloat z, GLfloat size, LPCTSTR label);
 	
-	static void DrawString(
+	static void DrawString(GLuint font_base,
 		int window_width, int window_height, GLfloat x, GLfloat y,
-			LPTSTR string, int text_height);
+			LPCTSTR string, int text_height);
 
 private:
 	CGLDrawHelper(void);

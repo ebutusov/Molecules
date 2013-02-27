@@ -108,7 +108,7 @@ CTwister::DoFreeRotation(DWORD delta)
 
 	DWORD interp_running = (GetTickCount() - m_interp_started)/1000;
 	
-	ATLASSERT(interp_running < 10);
+	//ATLASSERT(interp_running < 10);
 
 	if (interp_running > 5 && complete || interp_running > 10)
 	{

@@ -15,11 +15,10 @@ class CSaverWindow : public CWindowImpl<CSaverWindow>,
 	public COpenGL<CSaverWindow> //,public CIdleHandler
 {
 private:
-	GLuint font_base,	m_textureFloor;
+	GLuint m_font_base,	m_textureFloor;
 	GLfloat m_fZoom, m_fFloorPos;
 	
 	BOOL m_bTouchExit;	// exits when touched (key or mouse)
-	BOOL m_bPreview;		// is preview mode
 	int m_nFps, m_nFpsCount;
 	DWORD m_dFrameTime;	// time it took to render single frame
 	DWORD m_dLastFrameDrawn;
@@ -29,6 +28,7 @@ private:
 	LPARAM m_paramCoord;
 	BOOL m_bHaveCoord;
 	CString m_csErrorText;
+	CString m_headerText;
 	DWORD m_dLastMove;
 	CMolecule *m_pMolecule;			// current displayed molecule
 	CMoleculeList m_MManager;		// manages molecule building and loading
@@ -54,7 +54,7 @@ public:
 	void OnResize(int cx, int cy);
 	//BOOL OnIdle();
 	BOOL RunSaver();
-	HWND Create(HWND hwndParent, BOOL bExitOnTouch, BOOL preview, LPRECT lprc=NULL);
+	HWND Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc=NULL);
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
 	LRESULT OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
