@@ -23,7 +23,7 @@ int Run(LPTSTR /*lpstrCmdLine*/ = NULL, int nCmdShow = SW_SHOWDEFAULT)
 	_Module.AddMessageLoop(&theLoop);
 
 	CSaverWindow wndMain;
-	if(wndMain.Create(NULL, true) == NULL)
+	if(wndMain.Create(NULL, true, false) == NULL)
 	{
 		ATLTRACE(_T("Main window creation failed!\n"));
 		return 0;
@@ -44,7 +44,7 @@ int Preview(HWND parent)
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
 	CSaverWindow wndMain;
-	if(wndMain.Create(parent, false) == NULL)
+	if(wndMain.Create(parent, true, true) == NULL)
 	{
 		ATLTRACE(_T("Main window creation failed!\n"));
 		return 0;

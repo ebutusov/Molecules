@@ -34,7 +34,7 @@ CAtom::CAtom(void)
 	m_ZCoord = 0.0f;
   m_bSkip = FALSE;
 	m_ScaledSize = 1.0f;
-	_tcsncpy_s(m_Name, 4, _T("UNK"), 3);
+	_tcsncpy_s(m_Name, 4, _T("?"), 3);
 	_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 }
 
@@ -43,6 +43,12 @@ CAtom::SetName(TCHAR *name)
 {
 	_tcsncpy_s(m_Name, 4, name, 3);
 	return LoadDefaults();
+}
+
+LPCTSTR
+CAtom::GetShortName()
+{
+	return m_Name;
 }
 
 void
@@ -197,20 +203,20 @@ CAtom::LoadDefaults()
 		{
 			found = TRUE;
 			_tcscpy_s(m_FullName, 20, m_AtomDefaults[i].full_name);
-			this->m_Size = m_AtomDefaults[i].size;
-			this->m_ColorR = m_AtomDefaults[i].color[0];
-			this->m_ColorG = m_AtomDefaults[i].color[1];
-			this->m_ColorB = m_AtomDefaults[i].color[2];
+			m_Size = m_AtomDefaults[i].size;
+			m_ColorR = m_AtomDefaults[i].color[0];
+			m_ColorG = m_AtomDefaults[i].color[1];
+			m_ColorB = m_AtomDefaults[i].color[2];
 		}	
 	}
 	if(!found)
 	{
-		_tcsncpy_s(m_Name, 4, _T("UNK"), 3);
+		_tcsncpy_s(m_Name, 4, _T("?"), 3);
 		_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
-		this->m_Size = 1.0f;
-		this->m_ColorR = 0.0f;
-		this->m_ColorG = 1.0f;
-		this->m_ColorB = 0.0f;
+		m_Size = 1.0f;
+		m_ColorR = 0.0f;
+		m_ColorG = 1.0f;
+		m_ColorB = 0.0f;
 	}
 	return found;
 }

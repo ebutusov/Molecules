@@ -10,6 +10,7 @@ public:
 	void SetColor(GLfloat r, GLfloat g, GLfloat b);
 	void GetColor(GLfloat *rColor);
 	BOOL SetName(TCHAR *name);
+	LPCTSTR GetShortName();
 	void SetScaledSize(GLfloat size);
 	GLfloat GetScaledSize();
 	GLfloat GetX() { return m_XCoord; }

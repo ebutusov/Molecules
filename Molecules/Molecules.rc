@@ -86,17 +86,18 @@ BEGIN
     EDITTEXT        IDC_EDITSHOW,110,15,34,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Molecule presentation time: ",IDC_LBPRESTIME,13,18,94,11
     LTEXT           "(15 - 600 sec) ",IDC_LBPRESTIMEDESC,151,18,47,11
-    CONTROL         "Show FPS info",IDC_CHKFPS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,128,95,94,10
-    CONTROL         "Show molecule description",IDC_CHKDESC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,59,105,10
-    CONTROL         "Show as wireframe",IDC_CHKWIRE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,128,59,89,10
-    CONTROL         "Show atom links",IDC_CHKLINKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,128,77,89,10
-    CONTROL         "Animate building process",IDC_CHKBUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,77,96,10
+    CONTROL         "Show FPS info",IDC_CHKFPS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,114,94,10
+    CONTROL         "Show molecule description",IDC_CHKDESC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,60,105,10
+    CONTROL         "Show as wireframe",IDC_CHKWIRE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,60,105,10
+    CONTROL         "Show atom links",IDC_CHKLINKS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,78,105,10
+    CONTROL         "Animate building process",IDC_CHKBUILD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,78,96,10
     LTEXT           "Stop rendering after:",IDC_LBEXITTIME,13,35,94,11
     EDITTEXT        IDC_EDITEXITAFTER,110,32,34,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "(0 - 60 min, 0=off) ",IDC_LBEXITTIMEDESC,150,34,81,11
     CONTROL         "Teletype text",IDC_CHK_TT_TEXT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,95,94,10
-    GROUPBOX        "",IDC_STATIC,7,7,250,162
-    CONTROL         "Show reflection",IDC_CHKREFLECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,112,94,10
+    GROUPBOX        "",IDC_STATIC,9,5,247,162
+    CONTROL         "Show reflection",IDC_CHKREFLECTION,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,113,94,10
+    CONTROL         "Show atom labels",IDC_CHKLABELS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,139,96,94,10
 END
 
 

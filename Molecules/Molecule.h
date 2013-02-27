@@ -15,6 +15,7 @@ public:
 	void PutLink(int from, int to);
 	void EnableLinks(bool enable);
 	void EnableWire(bool enable);
+	void EnableLabels(bool enable);
 
 	void SetDescription(LPTSTR desc);
 	int GetAtomsCount();
@@ -34,6 +35,7 @@ public:
 protected:
 	DrawingMode m_DrawMode;
 	bool m_bDrawLinks;
+	bool m_bDrawLabels;
 	bool m_bWireMode;
 	static GLfloat LINKCOLOR[4];
 	CString m_Description;
@@ -46,6 +48,7 @@ protected:
 
 	void DrawLinks();
 	void DrawAtoms();
+	void DrawLabels();
 
 	typedef CAtom* AtomPtr;
 	std::map<int, AtomPtr> m_Atoms;

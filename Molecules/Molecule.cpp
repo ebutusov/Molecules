@@ -133,6 +133,11 @@ CMolecule::EnableWire(bool enable)
 	m_bWireMode = enable;
 }
 
+void CMolecule::EnableLabels(bool enable)
+{
+	m_bDrawLabels = enable;
+}
+
 void
 CMolecule::InitExplosion(GLfloat dist_factor)
 {
@@ -428,6 +433,23 @@ CMolecule::DoImpExplode(GLfloat delta)
 	return all_atoms_ready;
 }
 
+void CMolecule::DrawLabels()
+{
+	FOREACH_ATOM(atom)
+		 if (atom->GetSkip())
+      continue;
+		GLfloat color[4];
+		atom->GetColor(color);
+		color[3] = 1.0f;
+		//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+		glColor3fv(color);
+		GLfloat size = m_bDrawLinks ? atom->GetScaledSize() : atom->GetSize();
+		GLfloat x, y, z;
+		atom->GetCurrentCoords(x, y, z);
+		CGLDrawHelper::DrawLabel(x, y, z, 2.0f* size, atom->GetShortName());
+	END_FA
+}
+
 void
 CMolecule::DrawAtoms()
 {
@@ -495,8 +517,9 @@ CMolecule::Draw()
 		}
 		else
 			glCallList(m_dl);
+		if (m_bDrawLabels) DrawLabels();
 	}
-	else
+	else // explosion or implosion
 	{
 		if(m_bFromDL)
 		{
@@ -504,6 +527,7 @@ CMolecule::Draw()
 			m_bFromDL = FALSE;
 		}
 		DrawAtoms();
+		if (m_bDrawLabels) DrawLabels();
 	}
 }
 

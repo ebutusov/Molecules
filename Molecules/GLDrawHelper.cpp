@@ -9,6 +9,21 @@
 
 typedef struct { GLfloat x, y, z; } XYZ;
 
+DWORD CGLDrawHelper::m_font_base = 0;
+
+void CGLDrawHelper::InitFonts(DWORD font_base)
+{
+	ATLASSERT(m_font_base == 0);
+	m_font_base = font_base;
+}
+
+void CGLDrawHelper::FreeFonts()
+{
+	ATLASSERT(m_font_base != 0);
+	::glDeleteLists(m_font_base, 255);
+	m_font_base = 0;
+}
+
 void
 CGLDrawHelper::DrawSphere(int stacks, int slices, BOOL wire)
 {
@@ -192,8 +207,70 @@ CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
       }
 }
  
+// code taken from xscreensaver
+
+/* 
+	First, we translate the origin to the center of the atom.
+
+	Then we retrieve the prevailing modelview matrix (which
+	includes any rotation, wandering, and user-trackball-rolling
+	of the scene.
+
+	We set the top 3x3 cells of that matrix to be the identity
+	matrix.  This removes all rotation from the matrix, while
+	leaving the translation alone.  This has the effect of
+	leaving the prevailing coordinate system perpendicular to
+	the camera view: were we to draw a square face, it would
+	be in the plane of the screen.
+
+	Now we translate by `size' toward the viewer -- so that the
+	origin is *just in front* of the ball.
+
+	Then we draw the label text, allowing the depth buffer to
+	do its work: that way, labels on atoms will be occluded
+	properly when other atoms move in front of them.
+
+	This technique (of neutralizing rotation relative to the
+	observer, after both rotations and translations have been
+	applied) is known as "billboarding".
+	
+	(by Jamie Zawinski)
+ */
+
+void CGLDrawHelper::DrawLabel(GLfloat x, GLfloat y, GLfloat z, GLfloat size, LPCTSTR label)
+{
+	GLfloat m[4][4];
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+	glPushMatrix();
+	glTranslatef(x, y, z);               /* get matrix */
+  glGetFloatv (GL_MODELVIEW_MATRIX, &m[0][0]);  /* load rot. identity */
+  m[0][0] = 1; m[1][0] = 0; m[2][0] = 0;
+  m[0][1] = 0; m[1][1] = 1; m[2][1] = 0;
+  m[0][2] = 0; m[1][2] = 0; m[2][2] = 1;
+  glLoadIdentity();                             /* reset modelview */
+  glMultMatrixf (&m[0][0]);                     /* replace with ours */
+
+  glTranslatef (0, size / 2, size);           /* move toward camera */
+
+  glRasterPos3f (0, 0, 0);                     /* draw text here */
+
+  /* Before drawing the string, shift the origin to center
+      the text over the origin of the sphere. */
+ /* glBitmap (0, 0, 0, 0,
+            -string_width (mc->xfont1, a->label) / 2,
+            -mc->xfont1->descent,
+            NULL);*/
+
+  for (int j = 0; j < _tcslen(label); j++)
+    glCallList (m_font_base + (int)(label[j]));
+
+  glPopMatrix();
+	glPopAttrib();
+}
+
 void
-CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height, GLfloat x, GLfloat y, LPTSTR string,
+CGLDrawHelper::DrawString(int window_width, int window_height, GLfloat x, GLfloat y, LPTSTR string,
 													int text_height)
 {
 	int copy_len = _tcslen(string);
@@ -231,7 +308,7 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
 					glRasterPos2f(x, y_pos);
 					int len = _tcslen(sp);
 					glPushAttrib(GL_LIST_BIT);
-					glListBase(font_dlist);
+					glListBase(m_font_base);
 					// XXX CHECK THIS!
 #ifdef UNICODE
 					glCallLists(len, GL_UNSIGNED_SHORT, sp);
@@ -262,8 +339,4 @@ CGLDrawHelper::DrawString(GLuint font_dlist, int window_width, int window_height
   }
   glPopAttrib();
   glMatrixMode(GL_MODELVIEW);
-}
-
-CGLDrawHelper::~CGLDrawHelper(void)
-{
 }

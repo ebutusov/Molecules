@@ -55,7 +55,7 @@ CSetOptionsPg::OnApply()
 			DisplayError();
 			return 1;
 		}
-		m_pPrefs->dShowTime = m_showTime*1000;
+		m_pPrefs->dDisplayTime = m_showTime*1000;
 		m_pPrefs->dRunTime = m_exitAfter;
 		m_pPrefs->bShowDesc = m_bShowDesc;
 		m_pPrefs->bShowFPS = m_bShowFps;
@@ -64,6 +64,7 @@ CSetOptionsPg::OnApply()
 		m_pPrefs->bAnimateBuild = m_bBuilding;
 		m_pPrefs->bTeleType = m_bTeleType;
     m_pPrefs->bReflection = m_bReflection;
+		m_pPrefs->bShowLabels = m_bLabels;
 		m_bChanged = FALSE;
 	}
 	return 0;
@@ -92,7 +93,7 @@ CSetOptionsPg::DisplayError()
 LRESULT
 CSetOptionsPg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-	m_showTime = m_pPrefs->dShowTime/1000;
+	m_showTime = m_pPrefs->dDisplayTime/1000;
 	m_exitAfter = m_pPrefs->dRunTime;
 	m_bShowFps = m_pPrefs->bShowFPS;
 	m_bShowDesc = m_pPrefs->bShowDesc;
@@ -101,6 +102,7 @@ CSetOptionsPg::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/,
 	m_bBuilding = m_pPrefs->bAnimateBuild;
 	m_bTeleType = m_pPrefs->bTeleType;
   m_bReflection = m_pPrefs->bReflection;
+	m_bLabels = m_pPrefs->bShowLabels;
 	DoDataExchange(DDX_LOAD);
 	EventChkDescChanged();
 	return 0;

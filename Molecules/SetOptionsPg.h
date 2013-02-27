@@ -34,6 +34,7 @@ public:
 		DDX_CHECK(IDC_CHKBUILD, m_bBuilding)
 		DDX_CHECK(IDC_CHK_TT_TEXT, m_bTeleType)
     DDX_CHECK(IDC_CHKREFLECTION, m_bReflection);
+    DDX_CHECK(IDC_CHKLABELS, m_bLabels);
 	END_DDX_MAP()
 
 	SPreferences *m_pPrefs;
@@ -47,6 +48,7 @@ private:
 	BOOL m_bBuilding;
 	BOOL m_bTeleType;
   BOOL m_bReflection;
+	BOOL m_bLabels;
 
 	BOOL m_bChanged;
 

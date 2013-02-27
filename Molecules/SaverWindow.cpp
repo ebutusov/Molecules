@@ -27,9 +27,10 @@ CSaverWindow::CSaverWindow() :
 { }
 
 
-HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
+HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, BOOL preview, LPRECT lprc)
 {
 	m_bTouchExit = bExitOnTouch;
+	m_bPreview = preview;
 	RECT rc;
 	DWORD dwStyle = WS_CHILD;
 	DWORD dwExStyle = WS_EX_TOOLWINDOW;
@@ -89,7 +90,7 @@ LRESULT CSaverWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 LRESULT CSaverWindow::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
   ::glDeleteLists(m_textureFloor, 1);
-	::glDeleteLists(m_base_list, 256);
+	CGLDrawHelper::FreeFonts();
 	::PostQuitMessage(0);
 	return 0;
 }
@@ -178,6 +179,7 @@ void CSaverWindow::OnInit()
 		MessageBox(_T("Cannot create font!"), _T("Error"), MB_OK|MB_ICONERROR);
 	else
 	{
+		// create font list for opengl and pass it to draw helper
 		CDC dc(this->GetDC());
 		HFONT oldfont = dc.SelectFont(newFont);
 		TEXTMETRIC tm;
@@ -190,11 +192,11 @@ void CSaverWindow::OnInit()
 		GetClientRect(&rc);
 		if(rc.right-rc.left<m_lTextHeight*10)
 			m_bScreenTooSmall = TRUE;
-		m_base_list = glGenLists(256);
-		//glGenLists(96+32);
+
 		font_base = 1000; // ot tak
 		wglUseFontBitmaps(dc.m_hDC, 0, 255, font_base);
-		//font_base -= 32;
+		//wglUseFontBitmaps(dc.m_hDC, 32, 96, font_base);
+		CGLDrawHelper::InitFonts(font_base);
 		dc.SelectFont(oldfont);
 	}
 	srand(TICK());
@@ -236,6 +238,7 @@ CSaverWindow::LoadMolecule()
 		// prepare for drawing molecule
 		m_State = opZoomIn;
 		m_pMolecule->EnableLinks(m_Settings.bShowLinks);
+		m_pMolecule->EnableLabels(m_Settings.bShowLabels && !m_bPreview);
 		m_pMolecule->EnableWire(m_Settings.bWire);
 		if(m_Settings.bAnimateBuild)
 			m_pMolecule->InitImplosion(2.0f);
@@ -315,7 +318,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 		if (delta == 0) delta = 1;
 		GLfloat dsec = (GLfloat)delta/1000.0f;
 		
-		if (m_pMolecule && m_State == opRender && tick - m_dShowTimeStart >= m_Settings.dShowTime)
+		if (m_pMolecule && m_State == opRender && tick - m_dShowTimeStart >= m_Settings.dDisplayTime)
 		{
 			m_State = opZoomOut;
 			if(m_Settings.bAnimateBuild && m_pMolecule)
@@ -529,7 +532,7 @@ void CSaverWindow::OnRender()
 				desc.Format(_T("%s\nFPS: %3d FTIME: %3d [ms]"), 
 					m_Settings.bTeleType? m_Blender.DoBlend() : m_pMolecule->GetDescription(), m_nFps, m_dFrameTime);
 			}
-			CGLDrawHelper::DrawString(font_base, rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
+			CGLDrawHelper::DrawString(rect.right, rect.bottom, 0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight,
 				(LPTSTR)(LPCTSTR)desc, m_lTextHeight);
 		}   
 	}
@@ -547,7 +550,7 @@ void CSaverWindow::OnRender()
 		CGLDrawHelper::DrawTube(-10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);
 		CGLDrawHelper::DrawTube(0.0f, -10.0f, 0.0f, 0.0f, 10.0f, 0.0f, 1.0f, 1.0f, 8, TRUE, TRUE, FALSE);
 		if(!m_bScreenTooSmall)
-			CGLDrawHelper::DrawString(font_base, rect.right, rect.bottom,
+			CGLDrawHelper::DrawString(rect.right, rect.bottom,
 				0.0f, (GLfloat)(rect.bottom-rect.top)-m_lTextHeight, (LPTSTR)(LPCTSTR)m_csErrorText, m_lTextHeight);
 	}
 	glFlush();

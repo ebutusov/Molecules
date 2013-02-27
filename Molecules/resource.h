@@ -36,6 +36,8 @@
 #define IDC_CHKFPS2                     1020
 #define IDC_CHKREFLECTION               1020
 #define IDC_LBZACCEL                    1021
+#define IDC_CHKFPS3                     1021
+#define IDC_CHKLABELS                   1021
 #define IDC_LBDYACCMAX2                 1022
 #define IDC_CHKWIRE                     1023
 #define IDC_CHKLINKS                    1024
