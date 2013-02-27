@@ -3,6 +3,9 @@
 #include "Molecule.h"
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <string>
+#include <map>
+#include <vector>
 #include <algorithm>
 
 #define MAX(a, b) a > b ? a : b;

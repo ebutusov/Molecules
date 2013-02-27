@@ -1,7 +1,5 @@
 #pragma once
 #include <atlopengl.h>
-#include <map>
-#include <string>
 
 class CGLDrawHelper
 {
