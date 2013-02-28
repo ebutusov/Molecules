@@ -128,19 +128,20 @@ void
 CMolecule::EnableLinks(bool enable)
 {
 	m_bDrawLinks = enable;
-	if(enable)
-		RescaleAtoms();
+	m_bFromDL = false;	// need to create new list
 }
 
 void
 CMolecule::EnableWire(bool enable)
 {
 	m_bWireMode = enable;
+	m_bFromDL = false;	// need to create new list
 }
 
 void CMolecule::EnableLabels(bool enable)
 {
 	m_bDrawLabels = enable;
+	m_bFromDL = false;	// need to create new list
 }
 
 void CMolecule::SetFontList(GLuint list)
@@ -258,6 +259,8 @@ CMolecule::CalculateBoundingBox()
 		m_Height = 0.0f;
 		return;
 	}
+
+	RescaleAtoms();
 
 	GLfloat x1, y1, z1, x2, y2, z2;
 	AtomPtr firstAtom = m_Atoms.begin()->second;

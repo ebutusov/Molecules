@@ -187,6 +187,7 @@
     <ClInclude Include="SPrefs.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="TextureLoader.h" />
+    <ClInclude Include="Vector32d.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Molecules.ico" />

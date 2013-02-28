@@ -1,5 +1,6 @@
 #pragma once
 #include "Quaternion.h"
+#include "Vector32d.h"
 
 class CTwister
 {
@@ -18,7 +19,9 @@ private:
 	GLfloat m_max_speed;
 	CQuaternionf m_rot;
 	DWORD m_interp_started;
-	GLfloat m_axis[3], m_axis_new[3];
+
+	Vector3d<GLfloat> m_axis, m_axis_new;
+	//GLfloat m_axis[3], m_axis_new[3];
 	GLfloat m_speed, m_acc;
 	bool Interpolate(GLfloat delta);
 };

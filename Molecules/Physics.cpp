@@ -24,8 +24,10 @@ void CTwister::ResetState()
 void
 CTwister::Init(GLfloat max_speed)
 {
-	m_axis[0] = 1.0f; m_axis[1] =  1.0f; m_axis[2] = 1.0f;
-	m_axis_new[0] = 1.0f; m_axis_new[1] =  1.0f; m_axis_new[2] = 1.0f;
+	m_axis.SetValues(1.0f, 1.0f, 1.0f);
+	m_axis_new = m_axis;
+	/*m_axis[0] = 1.0f; m_axis[1] =  1.0f; m_axis[2] = 1.0f;
+	m_axis_new[0] = 1.0f; m_axis_new[1] =  1.0f; m_axis_new[2] = 1.0f;*/
 	m_rot.CreateFromAxisAngle(0.0f, 1.0f, 0.0f, 0.0f);
 	m_interp_started = ::GetTickCount();
 	m_max_speed = max_speed;
@@ -57,6 +59,8 @@ CTwister::Interpolate(GLfloat delta)
 		else
 			m_axis[i] = m_axis_new[i];
 	}
+	if (!complete)
+		m_axis.Normalize();
 	return complete;
 }
 
@@ -115,6 +119,7 @@ CTwister::DoFreeRotation(DWORD delta)
 		m_axis_new[0] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
 		m_axis_new[1] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
 		m_axis_new[2] = RANDOMSIGN() * (GLfloat)(rand()%100+1)/100.0f;
+		m_axis_new.Normalize();
 		m_interp_started = ::GetTickCount();
 	}
 
