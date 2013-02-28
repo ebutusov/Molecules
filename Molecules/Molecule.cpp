@@ -5,7 +5,6 @@
 #include <math.h>
 #include <string>
 #include <map>
-#include <vector>
 #include <algorithm>
 
 #define MAX(a, b) a > b ? a : b;
@@ -450,19 +449,20 @@ typedef std::wstring tstring;
 typedef std::string tstring;
 #endif
 
-template <typename T1, typename T2>
+template <typename T>
 struct less_comparer
 {
-	typedef std::pair<T1, T2> PairType;
-	bool operator() (PairType const &a, PairType const &b)
+	//typedef std::pair<T1, T2> PairType;
+	bool operator() (T const &a, T const &b)
 	{
-		// true if a < b
+		// true if and ony if a < b
 		// put C atoms first, then H, then the rest in alphabetical order
-		if (!_tcscmp(a.first.c_str(),_T("C"))) return true;
-		if (!_tcscmp(b.first.c_str(), _T("C"))) return false;
-		if (!_tcscmp(a.first.c_str(), _T("H"))) return true;
-		if (!_tcscmp(b.first.c_str(), _T("H"))) return false;
-		return _tcscmp(a.first.c_str(), b.first.c_str()) < 0;
+		if (!_tcscmp(a.c_str(), b.c_str())) return false; // identical keys, must be false to pass operator< test
+		if (!_tcscmp(a.c_str(),_T("C"))) return true;
+		if (!_tcscmp(b.c_str(), _T("C"))) return false;
+		if (!_tcscmp(a.c_str(), _T("H"))) return true;
+		if (!_tcscmp(b.c_str(), _T("H"))) return false;
+		return _tcscmp(a.c_str(), b.c_str()) < 0;
 	}
 };
 
@@ -470,7 +470,7 @@ void CMolecule::GenerateFormula()
 {
 	using namespace std;
 
-	map<tstring, int> counts;
+	map<tstring, int, less_comparer<tstring>> counts;
 	FOREACH_ATOM(atom)
 		counts[atom->GetName()]++;
 	END_FA
@@ -478,9 +478,7 @@ void CMolecule::GenerateFormula()
 	if (counts.size() > 20) // too many unique atoms
 		return;
 
-	vector<pair<tstring, int>> mcopy(begin(counts), end(counts));
-	sort(begin(mcopy), end(mcopy), less_comparer<tstring, int>());
-	for(auto it=mcopy.begin();it!=mcopy.end();++it)
+	for(auto it=counts.begin();it!=counts.end();++it)
 	{
 		CString f;
 		f.Format(_T("%s(%d)"), it->first.c_str(), it->second);

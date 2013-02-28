@@ -9,9 +9,10 @@ CAtom::atom_defaults CAtom::m_AtomDefaults[] =
 	{ _T("CA"),	_T("Calcium"), 1.80f, /* blue */ { 0.0f, 0.0f, 1.0f, 1.0f } },
 	{ _T("N"),	_T("Nitrogen"), 1.55f, /* violet */ { 0.5f, 0.0f, 1.0f, 1.0f } },
 	{ _T("O"),	_T("Oxygen"), 1.40f, /* red */ { 1.0f, 0.0f, 0.0f, 1.0f } },
-	{ _T("P"),	_T("Phosphor"), 1.28f, /* purple */ { 0.8f, 0.2f, 0.7f, 1.0f } },
+	{ _T("P"),	_T("Phosphorus"), 1.28f, /* purple */ { 0.8f, 0.2f, 0.7f, 1.0f } },
 	{ _T("S"),	_T("Sulfur"),   1.80f, /* yellow */ { 1.0f, 0.9f, 0.0f, 1.0f } },
-	{ _T("Cl"),	_T("Chlorine"), 0.97f, /* light green */ { 0.2f, 0.8f, 0.2f, 1.0f } }
+	{ _T("Cl"),	_T("Chlorine"), 0.97f, /* light green */ { 0.2f, 0.8f, 0.2f, 1.0f } },
+	{ _T("F"),	_T("Fluorine"), 0.57f, /* cyan */ { 0.0f, 0.8f, 0.8f, 1.0f } }
 };
 
 CAtom::CAtom(TCHAR *name)
