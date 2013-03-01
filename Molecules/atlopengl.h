@@ -48,21 +48,40 @@ class CGLMessageLoop : public CMessageLoop {
 	
 };
 
-// context cleanup helper class
+// context helper class for functions with offline calls to opengl
+// (other that OnInit, OnRender and OnResize).
 class CGLContext
 {
 private:
-	CClientDC *m_dc;
+	CClientDC m_dc;
 public:
-	CGLContext(CClientDC &dc)
+	CGLContext(HWND hwnd, HGLRC hrc)
+		: m_dc(hwnd)
 	{
-		m_dc = &dc;
+		m_dc.wglMakeCurrent(hrc);
 	}
+	
 	~CGLContext()
 	{
-		m_dc->wglMakeCurrent(NULL);
+		m_dc.wglMakeCurrent(NULL);
 	}
 };
+//
+//template <class T>
+//class CGLContext2
+//{
+//private:
+//	CClientDC m_dc;
+//public:
+//	CGLContext2(T *t): m_dc(t->m_hWnd)
+//	{
+//		m_dc.wglMakeCurrent(t->m_hRC);
+//	}
+//	~CGLContext2()
+//	{
+//		m_dc.wglMakeCurrent(NULL);
+//	}
+//};
 
 /////////////////////////////////////////////////////////////////////////////
 // COpenGL
@@ -118,16 +137,6 @@ public:
 		return 0;
 	}
 
-	// For off-line gl calls (other than placed in OnInit, OnRender and OnResize)
-	// we need the gl context asociated with dc. CGLContext helps to unset the context.
-	CGLContext CreateGLContext()
-	{
-		T* pT = static_cast<T*>(this);
-		CClientDC dc(pT->m_hWnd);
-		dc.wglMakeCurrent(m_hRC);
-		return CGLContext(dc);
-	}
-	
 	LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
 	{
 		if (m_hRC) {
