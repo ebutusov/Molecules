@@ -1,7 +1,5 @@
 #pragma once
 
-#include <atlopengl.h>
-
 class CAtom
 {
 public:
