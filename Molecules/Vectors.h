@@ -212,17 +212,26 @@ inline Vector3d<T> operator/(const Vector3d<T>& u, float s)
 template <typename T>
 inline Vector2d<T> operator+(Vector2d<T> &u, Vector2d<T> &v)
 {
-	return Vector2d(u.x + v.x, u.y + v.y);
+	return Vector2d<T>(u.x + v.x, u.y + v.y);
 }
 
 template <typename T>
 inline Vector2d<T> operator-(Vector2d<T> &u, Vector2d<T> &v)
 {
-	return Vector2d(u.x - v.x, u.y - v.y);
+	return Vector2d<T>(u.x - v.x, u.y - v.y);
 }
 
 template Vector3d<float>;
 template Vector3d<double>;
-
 typedef Vector3d<float> Vector3df;
 typedef Vector3d<double> Vector3dd;
+
+template Vector2d<float>;
+template Vector2d<double>;
+typedef Vector2d<float> Vector2df;
+typedef Vector2d<double> Vector2dd;
+
+#ifdef tReal
+typedef Vector2d<tReal> Vector2dT;
+typedef Vector3d<tReal> Vector3dT;
+#endif

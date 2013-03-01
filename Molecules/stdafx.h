@@ -29,7 +29,7 @@ extern CAppModule _Module;
 #include <atlcoll.h>
 #include <atlmisc.h>
 #include <atlddx.h>
-#include <atlopengl.h>
+#include "atlopengl.h"
 
 inline BOOL ScreenToClientRect(HWND hwnd, LPRECT prc)
 {
