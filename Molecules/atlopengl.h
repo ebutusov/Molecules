@@ -48,6 +48,22 @@ class CGLMessageLoop : public CMessageLoop {
 	
 };
 
+// context cleanup helper class
+class CGLContext
+{
+private:
+	CClientDC *m_dc;
+public:
+	CGLContext(CClientDC &dc)
+	{
+		m_dc = &dc;
+	}
+	~CGLContext()
+	{
+		m_dc->wglMakeCurrent(NULL);
+	}
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // COpenGL
 
@@ -100,6 +116,16 @@ public:
 
 		bHandled = FALSE;
 		return 0;
+	}
+
+	// For off-line gl calls (other than placed in OnInit, OnRender and OnResize)
+	// we need the gl context asociated with dc. CGLContext helps to unset the context.
+	CGLContext CreateGLContext()
+	{
+		T* pT = static_cast<T*>(this);
+		CClientDC dc(pT->m_hWnd);
+		dc.wglMakeCurrent(m_hRC);
+		return CGLContext(dc);
 	}
 	
 	LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)

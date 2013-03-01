@@ -66,6 +66,7 @@ DrawTubeM(GLfloat x1, GLfloat y1, GLfloat z1,
 #define FOREACH_ATOM(x) \
 	for(auto _it = m_Atoms.begin(); _it != m_Atoms.end(); ++_it) \
 	{ \
+		int _num = _it->first; \
 		AtomPtr x; \
 		x = _it->second;
 
@@ -76,7 +77,7 @@ GLfloat CMolecule::LINKCOLOR[4] = { 0.3f, 0.3f, 0.2f, 1.0f };
 CMolecule::CMolecule(void) 
 	: m_Description(_T("UNKNOWN")),
 	m_bDrawLabels(FALSE), m_bWireMode(FALSE), m_DrawMode(dmNormal),
-	m_dl(0), m_bFromDL(FALSE), m_font_base(0)
+	m_dl(0), m_bFromDL(FALSE), m_font_base(0), m_selected_atom(-1)
 {
 }
 
@@ -147,6 +148,12 @@ void CMolecule::EnableLabels(bool enable)
 void CMolecule::SetFontList(GLuint list)
 {
 	m_font_base = list;
+}
+
+void CMolecule::SetSelected(int num)
+{
+	m_selected_atom = num;
+	m_bFromDL = false;
 }
 
 void
@@ -501,7 +508,8 @@ void CMolecule::DrawLabels()
 		GLfloat size = m_bDrawLinks ? atom->GetScaledSize() : atom->GetSize();
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
-		CGLDrawHelper::DrawLabel(m_font_base, x, y, z, 2.0f* size, atom->GetName());
+		CGLDrawHelper::DrawLabel(m_font_base, x, y, z, 2.0f* size, 
+			_num == m_selected_atom ?  atom->GetFullName() : atom->GetName());
 	END_FA
 }
 
@@ -514,10 +522,14 @@ CMolecule::DrawAtoms()
 		GLfloat color[4];
 		atom->GetColor(color);
 		color[3] = 1.0f;
+		// draw selected atom as white
+		if (_num == m_selected_atom)
+			color[0] = color[1] = color[2] = 1.0f;
 		glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
 		GLfloat size = m_bDrawLinks ? atom->GetScaledSize() : atom->GetSize();
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
+		glLoadName(_num);
 		DrawSphereM(x, y, z, size, m_bWireMode, m_ElementScale);
 	END_FA
 }

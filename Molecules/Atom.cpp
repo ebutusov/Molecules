@@ -48,11 +48,16 @@ CAtom::SetName(TCHAR *name)
 	return LoadDefaults();
 }
 
-LPCTSTR
-CAtom::GetName()
+LPCTSTR CAtom::GetName()
 {
 	return m_Name;
 }
+
+LPCTSTR CAtom::GetFullName()
+{
+	return m_FullName;
+}
+
 
 void
 CAtom::SetCoords(GLfloat x, GLfloat y, GLfloat z)

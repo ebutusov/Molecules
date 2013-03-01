@@ -11,7 +11,6 @@ public:
 	CMolecule(void);
 	void CreateAtom(GLfloat x, GLfloat y, GLfloat z, TCHAR *atomName, int number);
 	void Draw();
-
 	void PutLink(int from, int to);
 	void EnableLinks(bool enable);
 	void EnableWire(bool enable);
@@ -28,10 +27,13 @@ public:
 	void InitExplosion(GLfloat dist_factor = 2.0f);
 	void InitImplosion(GLfloat dist_factor = 2.0f);
 	void GenerateFormula();
+	void SetSelected(int num);
 	bool DoImpExplode(GLfloat delta);
 	typedef enum DrawingMode { dmNormal, dmExplode, dmImplode };
+	~CMolecule(void);
 
-	virtual ~CMolecule(void);
+private:
+	CMolecule(CMolecule& other);	// no copying
 
 protected:
 	GLuint m_font_base;
@@ -48,6 +50,7 @@ protected:
 	void RescaleAtoms();
 	GLuint m_dl;
 	bool m_bFromDL;
+	int m_selected_atom;
 
 	void DrawLinks();
 	void DrawAtoms();
