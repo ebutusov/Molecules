@@ -125,7 +125,7 @@
     <ClInclude Include="Quaternion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Vector32d.h">
+    <ClInclude Include="Vectors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

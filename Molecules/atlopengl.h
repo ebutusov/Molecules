@@ -66,22 +66,6 @@ public:
 		m_dc.wglMakeCurrent(NULL);
 	}
 };
-//
-//template <class T>
-//class CGLContext2
-//{
-//private:
-//	CClientDC m_dc;
-//public:
-//	CGLContext2(T *t): m_dc(t->m_hWnd)
-//	{
-//		m_dc.wglMakeCurrent(t->m_hRC);
-//	}
-//	~CGLContext2()
-//	{
-//		m_dc.wglMakeCurrent(NULL);
-//	}
-//};
 
 /////////////////////////////////////////////////////////////////////////////
 // COpenGL

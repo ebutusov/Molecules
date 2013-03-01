@@ -1,6 +1,6 @@
 #pragma once
 #include "Quaternion.h"
-#include "Vector32d.h"
+#include "Vectors.h"
 
 class CTwister
 {
