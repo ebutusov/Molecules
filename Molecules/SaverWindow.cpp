@@ -12,7 +12,6 @@
 #define TICK() ::GetTickCount()
 
 CSaverWindow::CSaverWindow() :
-
 	m_bHaveCoord(false),
 	m_pMolecule(NULL),
 	m_fZoom(-100.0f),
@@ -20,14 +19,14 @@ CSaverWindow::CSaverWindow() :
 	m_nFps(0),
 	m_dLastMove(0),
 	m_dFrameTime(0), 
-	m_bShowDesc(TRUE),
-	m_bScreenTooSmall(FALSE),
+	m_bShowDesc(true),
+	m_bScreenTooSmall(false),
 	m_State(opZoomIn),
 	m_fFloorPos(0.0f)
 { }
 
 
-HWND CSaverWindow::Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc)
+HWND CSaverWindow::Create(HWND hwndParent, bool bExitOnTouch, LPRECT lprc)
 {
 	m_bTouchExit = bExitOnTouch;
 	RECT rc;
@@ -184,15 +183,14 @@ void CSaverWindow::OnInit()
 		CDC dc(this->GetDC());
 		HFONT oldfont = dc.SelectFont(newFont);
 		TEXTMETRIC tm;
-		BOOL ok = GetTextMetrics(dc.m_hDC, &tm);
-		if(ok)
+		if (GetTextMetrics(dc.m_hDC, &tm))
 			m_lTextHeight = tm.tmHeight;
 		else
 			m_lTextHeight = 0;
 		RECT rc;
 		GetClientRect(&rc);
 		if(rc.right-rc.left<m_lTextHeight*10)
-			m_bScreenTooSmall = TRUE;
+			m_bScreenTooSmall = true;
 
 		m_font_base = 1000;
 		wglUseFontBitmaps(dc.m_hDC, 0, 255, m_font_base);
@@ -204,12 +202,11 @@ void CSaverWindow::OnInit()
 	return;
 }
 
-BOOL
-CSaverWindow::LoadMolecule()
+bool CSaverWindow::LoadMolecule()
 {
 	CFile file;
 	std::unique_ptr<TCHAR> dir(::_tgetcwd(NULL, 0));
-	BOOL ok = FALSE;
+	bool ok = FALSE;
 	CMoleculeBuilder builder;
 	m_bError = FALSE;
 	
@@ -248,7 +245,7 @@ CSaverWindow::LoadMolecule()
 		if(m_Settings.bTeleType)
 			m_Blender.SetString(m_headerText, 5);
 		
-		ok = TRUE;
+		ok = true;
 	}
 	return ok;
 }
@@ -256,8 +253,7 @@ CSaverWindow::LoadMolecule()
 #define TIMER_FPS 666
 #define TIMER_MOVE 69
 
-BOOL
-CSaverWindow::RunSaver()
+bool CSaverWindow::RunSaver()
 {
 	if(m_Settings.dRunTime !=0)
 		m_StopTime = TICK() + m_Settings.dRunTime * 60000;
@@ -265,7 +261,7 @@ CSaverWindow::RunSaver()
 		m_StopTime = 0;
 
 	m_Twister.Init(m_Settings.fMaxSpeed);
-	BOOL ret = TRUE;
+	bool ret = true;
   if(m_pMolecule)
 	{
 		SetTimer(TIMER_FPS, 1000);
@@ -415,7 +411,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 		m_dFrameTime = TICK() - tick;		
 	}
 	else
-		bHandled = FALSE;
+		bHandled = false;
 	return 0;
 }
 
@@ -595,9 +591,7 @@ void CSaverWindow::OnResize(int cx, int cy)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-BOOL
-CSaverWindow::LoadPreferences()
+void CSaverWindow::LoadPreferences()
 {
   m_Settings.Load();
-	return TRUE;
 }

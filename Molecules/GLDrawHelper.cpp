@@ -8,8 +8,7 @@
 
 typedef struct { GLfloat x, y, z; } XYZ;
 
-void
-CGLDrawHelper::DrawSphere(int stacks, int slices, BOOL wire)
+void CGLDrawHelper::DrawSphere(int stacks, int slices, bool wire)
 {
 	int i,j;
   double theta1, theta2, theta3;
@@ -80,11 +79,10 @@ CGLDrawHelper::DrawSphere(int stacks, int slices, BOOL wire)
     }
 }
 
-void
-CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
+void CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
       GLfloat x2, GLfloat y2, GLfloat z2,
       GLfloat diameter, GLfloat cap_size,
-      int faces, BOOL smooth, BOOL caps_p, BOOL wire)
+      int faces, bool smooth, bool caps_p, bool wire)
 {
 	 GLfloat length, X, Y, Z;
 
@@ -119,8 +117,7 @@ CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
 	
 } 
 
-void
-CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
+void CGLDrawHelper::DrawTube_INT(int faces, bool smooth, bool caps_p, bool wire)
 {
   int i;
   GLfloat step = (GLfloat)M_PI * 2.0f / faces;

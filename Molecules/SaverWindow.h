@@ -18,15 +18,15 @@ private:
 	GLuint m_font_base,	m_textureFloor;
 	GLfloat m_fZoom, m_fFloorPos;
 	
-	BOOL m_bTouchExit;	// exits when touched (key or mouse)
+	bool m_bTouchExit;	// exits when touched (key or mouse)
 	int m_nFps, m_nFpsCount;
 	DWORD m_dFrameTime;	// time it took to render single frame
 	DWORD m_dLastFrameDrawn;
 	DWORD m_dShowTimeStart; // time since start of render state
 	LONG m_lTextHeight;
-	BOOL m_bShowDesc, m_bScreenTooSmall, m_bShowFps, m_bError;
+	bool m_bShowDesc, m_bScreenTooSmall, m_bShowFps, m_bError;
 	LPARAM m_paramCoord;
-	BOOL m_bHaveCoord;
+	bool m_bHaveCoord;
 	CString m_csErrorText;
 	CString m_headerText;
 	DWORD m_dLastMove;
@@ -39,13 +39,12 @@ private:
 	CStringBlender m_Blender;
 	CTwister m_Twister;						// rotation logic
 	
-	BOOL LoadMolecule();
-	BOOL LoadPreferences();
+	bool LoadMolecule();
+	void LoadPreferences();
   void DrawFloor();
 	void UpdateFloor(DWORD delta);
 
 public:
-
 	DECLARE_WND_CLASS(_T("ScreenSaverClass"))
 	CSaverWindow(void);
 
@@ -53,8 +52,8 @@ public:
 	void OnRender();
 	void OnResize(int cx, int cy);
 	//BOOL OnIdle();
-	BOOL RunSaver();
-	HWND Create(HWND hwndParent, BOOL bExitOnTouch, LPRECT lprc=NULL);
+	bool RunSaver();
+	HWND Create(HWND hwndParent, bool bExitOnTouch, LPRECT lprc=NULL);
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled);
 	LRESULT OnKeyDown(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);

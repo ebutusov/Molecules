@@ -48,8 +48,7 @@ TCHAR* ReadFile(LPCTSTR filename)
 	return ret; // caller must free this!
 }
 
-CMolecule*
-CMoleculeBuilder::LoadFromFile(LPCTSTR filename)
+CMolecule* CMoleculeBuilder::LoadFromFile(LPCTSTR filename)
 {
 	ATLASSERT(filename != NULL);
 	TCHAR *fptr = ReadFile(filename);
@@ -71,8 +70,7 @@ CMoleculeBuilder::LoadFromFile(LPCTSTR filename)
 	//return mol->GetAtomsCount()>0 ? mol : NULL;
 }
 
-void
-CMoleculeBuilder::BuildMolecule(CMolecule *mol, TCHAR *filebuf)
+void CMoleculeBuilder::BuildMolecule(CMolecule *mol, TCHAR *filebuf)
 {
 	TCHAR delims[] = _T("\n");
 	TCHAR *context;
@@ -89,8 +87,7 @@ CMoleculeBuilder::BuildMolecule(CMolecule *mol, TCHAR *filebuf)
 	mol->CalculateBoundingBox();
 }
 
-void
-CMoleculeBuilder::ParseLine(TCHAR *line, CMolecule *mol)
+void CMoleculeBuilder::ParseLine(TCHAR *line, CMolecule *mol)
 {
 	int len = _tcslen(line);
 	if(len < 6)

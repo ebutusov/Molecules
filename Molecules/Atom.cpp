@@ -22,12 +22,12 @@ CAtom::CAtom(TCHAR *name)
 	m_ZCoord = 0.0f;
 	m_ScaledSize = 1.0f;
 	_tcsncpy_s(m_Name, name, 3);
-  m_bSkip = FALSE;
+  m_bSkip = false;
 	memset(m_FullName, 0, sizeof(m_FullName));
 	// TODO: check if defauts were loaded, if not, remove this atom
 	// and its links from the molecule
 	LoadDefaults();
-	m_IsOnTheMove = FALSE;
+	m_IsOnTheMove = false;
 }
 
 CAtom::CAtom(void)
@@ -35,14 +35,13 @@ CAtom::CAtom(void)
 	m_XCoord = 0.0f;
 	m_YCoord = 0.0f;
 	m_ZCoord = 0.0f;
-  m_bSkip = FALSE;
+  m_bSkip = false;
 	m_ScaledSize = 1.0f;
 	_tcsncpy_s(m_Name, _T("?"), 3);
 	_tcsncpy_s(m_FullName, 20, _T("UNKNOWN"), 7);
 }
 
-BOOL
-CAtom::SetName(TCHAR *name)
+bool CAtom::SetName(TCHAR *name)
 {
 	_tcsncpy_s(m_Name, name, 3);
 	return LoadDefaults();
@@ -59,97 +58,84 @@ LPCTSTR CAtom::GetFullName()
 }
 
 
-void
-CAtom::SetCoords(GLfloat x, GLfloat y, GLfloat z)
+void CAtom::SetCoords(GLfloat x, GLfloat y, GLfloat z)
 {
 	m_XCur = m_XCoordOut = m_XCoord = x;
 	m_YCur = m_YCoordOut = m_YCoord = y;
 	m_ZCur = m_ZCoordOut = m_ZCoord = z;
 }
 
-void
-CAtom::GetCoords(GLfloat &x, GLfloat &y, GLfloat &z)
+void CAtom::GetCoords(GLfloat &x, GLfloat &y, GLfloat &z)
 {
 	x = m_XCoord;
 	y = m_YCoord;
 	z = m_ZCoord;
 }
 
-void
-CAtom::GetOutCoords(GLfloat &x, GLfloat &y, GLfloat &z)
+void CAtom::GetOutCoords(GLfloat &x, GLfloat &y, GLfloat &z)
 {
 	x = m_XCoordOut;
 	y = m_YCoordOut;
 	z = m_ZCoordOut;
 }
 
-void
-CAtom::SetOutCoords(GLfloat x, GLfloat y, GLfloat z)
+void CAtom::SetOutCoords(GLfloat x, GLfloat y, GLfloat z)
 {
 	m_XCoordOut = x;
 	m_YCoordOut = y;
 	m_ZCoordOut = z;
 }
 
-void
-CAtom::GetCurrentCoords(GLfloat &x, GLfloat &y, GLfloat &z)
+void CAtom::GetCurrentCoords(GLfloat &x, GLfloat &y, GLfloat &z)
 {
 	x = m_XCur; y = m_YCur; z = m_ZCur;
 }
 
-void
-CAtom::SetCurrentCoords(GLfloat x, GLfloat y, GLfloat z)
+void CAtom::SetCurrentCoords(GLfloat x, GLfloat y, GLfloat z)
 {
 	m_XCur = x; m_YCur = y; m_ZCur = z;
 }
 
 
-void
-CAtom::SetColor(GLfloat r, GLfloat g, GLfloat b)
+void CAtom::SetColor(GLfloat r, GLfloat g, GLfloat b)
 {
 	m_ColorR = r;
 	m_ColorG = g;
 	m_ColorB = b;
 }
 
-void
-CAtom::GetColor(GLfloat *rColor)
+void CAtom::GetColor(GLfloat *rColor)
 {
 	rColor[0] = m_ColorR;
 	rColor[1] = m_ColorG;
 	rColor[2] = m_ColorB;
 }
 
-void
-CAtom::SetScaledSize(GLfloat size)
+void CAtom::SetScaledSize(GLfloat size)
 {
 	m_ScaledSize = size;
 }
 
-GLfloat
-CAtom::GetScaledSize()
+GLfloat CAtom::GetScaledSize()
 {
 	return m_ScaledSize;
 }
 
-void
-CAtom::SetNormalAsCurrent()
+void CAtom::SetNormalAsCurrent()
 {
 	m_XCur = m_XCoord;
 	m_YCur = m_YCoord;
 	m_ZCur = m_ZCoord;
 }
 
-void
-CAtom::SetOutAsCurrent()
+void CAtom::SetOutAsCurrent()
 {
 	m_XCur = m_XCoordOut;
 	m_YCur = m_YCoordOut;
 	m_ZCur = m_ZCoordOut;
 }
 
-BOOL
-CAtom::NearToNormal(GLfloat tolerance)
+bool CAtom::NearToNormal(GLfloat tolerance)
 {
 	GLfloat xs = m_XCur - m_XCoord;
 	xs *= xs;
@@ -159,13 +145,12 @@ CAtom::NearToNormal(GLfloat tolerance)
 	zs *= zs;
 	GLfloat dist = sqrt(xs+ys+zs);
 	if(dist <= tolerance)
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
-BOOL
-CAtom::NearToOut(GLfloat tolerance)
+bool CAtom::NearToOut(GLfloat tolerance)
 {
 	GLfloat xs = m_XCur - m_XCoordOut;
 	xs *= xs;
@@ -175,9 +160,9 @@ CAtom::NearToOut(GLfloat tolerance)
 	zs *= zs;
 	GLfloat dist = sqrt(xs+ys+zs);
 	if(dist <= tolerance)
-		return TRUE;
+		return true;
 	else
-		return FALSE;
+		return false;
 }
 
 void CAtom::SizeLimits(float &max_size, float &min_size)
@@ -195,17 +180,16 @@ void CAtom::SizeLimits(float &max_size, float &min_size)
 }
 
 
-BOOL
-CAtom::LoadDefaults()
+bool CAtom::LoadDefaults()
 {
 	int len = _tcslen(m_Name);
 	if(len == 0)
 	{
 		_tcsncpy_s(m_Name, _T("???"), 3);
-		return FALSE;
+		return false;
 	}
 
-	BOOL found = FALSE;
+	bool found = false;
 	for(int i=0;i<_countof(m_AtomDefaults);i++)
 	{
 		int deflen = _tcslen(m_AtomDefaults[i].name);
@@ -213,7 +197,7 @@ CAtom::LoadDefaults()
 		if(deflen == namelen
 			&& !_tcsncicmp(m_AtomDefaults[i].name, m_Name, deflen > namelen ? namelen : deflen))
 		{
-			found = TRUE;
+			found = true;
 			_tcscpy_s(m_FullName, 20, m_AtomDefaults[i].full_name);
 			m_Size = m_AtomDefaults[i].size;
 			m_ColorR = m_AtomDefaults[i].color[0];

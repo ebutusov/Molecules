@@ -7,7 +7,7 @@ public:
 	CAtom(TCHAR * symbol);
 	void SetColor(GLfloat r, GLfloat g, GLfloat b);
 	void GetColor(GLfloat *rColor);
-	BOOL SetName(TCHAR *name);
+	bool SetName(TCHAR *name);
 	LPCTSTR GetName();
 	LPCTSTR GetFullName();
 	void SetScaledSize(GLfloat size);
@@ -23,15 +23,15 @@ public:
 	void GetCurrentCoords(GLfloat &x, GLfloat &y, GLfloat &z);
 	void SetNormalAsCurrent();
 	void SetOutAsCurrent();
-	BOOL GetMoveStatus() { return m_IsOnTheMove; }
+	bool GetMoveStatus() { return m_IsOnTheMove; }
 	GLfloat GetSpeed() { return m_fSpeed; }
 	void SetSpeed(GLfloat speed) { m_fSpeed = speed; }
-	void SetMoveStatus(BOOL s) { m_IsOnTheMove = s; }
-	BOOL NearToOut(GLfloat tolerance);
-	BOOL NearToNormal(GLfloat tolerance);
+	void SetMoveStatus(bool s) { m_IsOnTheMove = s; }
+	bool NearToOut(GLfloat tolerance);
+	bool NearToNormal(GLfloat tolerance);
 	GLfloat GetSize() { return m_Size; } 
-  BOOL GetSkip() { return m_bSkip; }
-  void SetSkip(BOOL skip) { m_bSkip = skip; }
+  bool GetSkip() { return m_bSkip; }
+  void SetSkip(bool skip) { m_bSkip = skip; }
 	static void SizeLimits(float &max_size, float &min_size);
 public:
 	virtual ~CAtom() {};
@@ -45,8 +45,8 @@ private:
 	TCHAR m_Name[5];
 	TCHAR m_FullName[20];
 
-	BOOL m_IsOnTheMove;
-  BOOL m_bSkip; // skip this atom during drawing;
+	bool m_IsOnTheMove;
+  bool m_bSkip; // skip this atom during drawing;
 
 	// atom coordinates
 	GLfloat m_XCoord;
@@ -83,6 +83,6 @@ private:
 	// shared default atom parameters
 	static atom_defaults m_AtomDefaults[];
 
-	BOOL LoadDefaults();
+	bool LoadDefaults();
 
 };
