@@ -7,7 +7,7 @@ template <typename T>
 class Vector3d
 {
 public:
-	Vector3d() : x(0.0), y(0.0), z(0.0) {};
+	Vector3d() : x(0.0f), y(0.0f), z(0.0f) {};
 	Vector3d(T xi, T yi, T zi): x(xi), y(yi), z(zi) {};
 	Vector3d(const T *xyz): x(xyz[0]), y(xyz[1]), z(xyz[2]) {};
 
@@ -27,31 +27,31 @@ public:
 
 	void Normalize()
 	{
-		static T tol = 0.0001;
+		static T tol = 0.0001f;
 		T m = Magnitude();
 		if(m <= tol) m = 1;
 		x /= m;
 		y /= m;
 		z /= m;
-		if(fabs(x) < tol) x = 0.0;
-		if(fabs(y) < tol) y = 0.0;
-		if(fabs(z) < tol) z = 0.0;
+		if(fabs(x) < tol) x = 0.0f;
+		if(fabs(y) < tol) y = 0.0f;
+		if(fabs(z) < tol) z = 0.0f;
 	}
 	
 	// angle between OY and vector
 	T GetAlfa()
 	{
-		Vector3d<T> oy(0.0, 1.0, 0.0);
+		Vector3d<T> oy(0.0f, 1.0f, 0.0f);
 		Vector3d<T> v(x, y, z);
 		v.Normalize();
 		oy.Normalize();
-		return acos(v.x * oy.x + v.y * oy.y + v.z * oy.z) * 180/M_PI;
+		return (T)acos(v.x * oy.x + v.y * oy.y + v.z * oy.z) * (T)(180/M_PI);
 	}
 
 	// angle between OX and vector (it's projection to OXY)
 	T GetGamma()
 	{
-		return atan2(z, x) * 180/M_PI;
+		return (T)atan2(z, x) * (T)(180/M_PI);
 	}
 
 	inline void Reverse()
@@ -70,6 +70,7 @@ public:
 		case 1: return y;
 		case 2: return z;
 		}
+		return z;
 	}
 
 	inline Vector3d<T>& operator+=(const Vector3d &v)
@@ -123,7 +124,7 @@ class Vector2d
 {
 public:
 	T x, y;
-	Vector2d() : x(0.0), y(0.0) {};
+	Vector2d() : x(0.0f), y(0.0f) {};
 	Vector2d(T xi, T yi): x(xi), y(yi) {};
 
 	inline T Magnitude()

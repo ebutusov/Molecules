@@ -458,6 +458,7 @@ void CSaverWindow::OnRender()
     GLfloat zoom = mirror ? m_fZoom*2.0f : m_fZoom;
     m_nFpsCount++;
     GLfloat dim = m_pMolecule->GetMaxDimension();
+		const GLfloat up_offset = dim/2.0f + 0.9f;
     GLfloat tx, ty, tz;
     m_pMolecule->GetTranslations(tx, ty, tz);
 	  double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
@@ -488,7 +489,7 @@ void CSaverWindow::OnRender()
       glClipPlane(GL_CLIP_PLANE0, eqr);
       glPushMatrix();
         glScalef(1.0f, -1.0, 1.0f); // scale y axis  
-        glTranslatef(0.0f, dim/2+0.8f, 0.0f);
+        glTranslatef(0.0f, up_offset, 0.0f);
 				glMultMatrixf(matrix);
 	      glTranslatef(tx, ty, tz);
         if (m_Settings.bShowLabels && !m_bScreenTooSmall)
@@ -517,12 +518,17 @@ void CSaverWindow::OnRender()
       glPopMatrix();
     }
 
-		glTranslatef(0.0f, dim/2+0.8f, 0.0f);	// rotate aroud this origin ...
-		glMultMatrixf(matrix);
+		// transformations go in reversed order, in our case:
+		// 1. correction translation is applied to center the molecule on origin
+		// 2. rotation matrix from twister is applied
+		// 3. transformation to dim/2... is applied to lift (rotated) molecule up
+		
+		glTranslatef(0.0f, up_offset, 0.0f);	// (3)
+		glMultMatrixf(matrix);	// (2)
 		//glRotatef(x, 1.0f, 0.0f, 0.0f);
 		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
-		//glRotatef(z, 0.0f, 0.0f, 1.0f);				// with these angles ...
-		glTranslatef(tx, ty, tz);							// object's center (translates to the center of molecule)
+		//glRotatef(z, 0.0f, 0.0f, 1.0f);
+		glTranslatef(tx, ty, tz); // (1) 
     
 		m_pMolecule->Draw();
 

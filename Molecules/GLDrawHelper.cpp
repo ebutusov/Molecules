@@ -50,29 +50,29 @@ CGLDrawHelper::DrawSphere(int stacks, int slices, BOOL wire)
               glVertex3f (la.x, la.y, la.z);
             }
 
-          e.x = cos (theta2) * cos(theta3);
-          e.y = sin (theta2);
-          e.z = cos (theta2) * sin(theta3);
-          p.x = c.x + r * e.x;
-          p.y = c.y + r * e.y;
-          p.z = c.z + r * e.z;
+          e.x = (GLfloat) (cos(theta2) * cos(theta3));
+          e.y = (GLfloat) (sin(theta2));
+          e.z = (GLfloat) (cos(theta2) * sin(theta3));
+          p.x = c.x + (GLfloat)r * e.x;
+          p.y = c.y + (GLfloat)r * e.y;
+          p.z = c.z + (GLfloat)r * e.z;
 
           glNormal3f (e.x, e.y, e.z);
-          glTexCoord2f (i       / (double)slices,
-                        2*(j+1) / (double)stacks2);
+          glTexCoord2f ((GLfloat)(i / (double)slices),
+                        (GLfloat)(2*(j+1) / (double)stacks2));
           glVertex3f (p.x, p.y, p.z);
           if (wire) la = p;
 
-          e.x = cos(theta1) * cos(theta3);
-          e.y = sin(theta1);
-          e.z = cos(theta1) * sin(theta3);
-          p.x = c.x + r * e.x;
-          p.y = c.y + r * e.y;
-          p.z = c.z + r * e.z;
+          e.x = (GLfloat) (cos(theta1) * cos(theta3));
+          e.y = (GLfloat) (sin(theta1));
+          e.z = (GLfloat) (cos(theta1) * sin(theta3));
+          p.x = c.x + (GLfloat)r * e.x;
+          p.y = c.y + (GLfloat)r * e.y;
+          p.z = c.z + (GLfloat)r * e.z;
 
           glNormal3f (e.x, e.y, e.z);
-          glTexCoord2f (i   / (double)slices,
-                        2*j / (double)stacks2);
+          glTexCoord2f ((GLfloat)(i / (double)slices),
+                        (GLfloat)(2*j / (double)stacks2));
           glVertex3f (p.x, p.y, p.z);
           if (wire) lb = p;
         }
@@ -102,8 +102,8 @@ CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
   glPushMatrix();
 
   glTranslatef(x1, y1, z1);
-  glRotatef (-atan2 (X, Y)               * (180 / M_PI), 0, 0, 1);
-  glRotatef ( atan2 (Z, sqrt(X*X + Y*Y)) * (180 / M_PI), 1, 0, 0);
+  glRotatef (-atan2 (X, Y)               * (GLfloat)(180.0f / M_PI), 0, 0, 1);
+  glRotatef ( atan2 (Z, sqrt(X*X + Y*Y)) * (GLfloat)(180.0f / M_PI), 1, 0, 0);
   glScalef (diameter, length, diameter);
 
   /* extend the endpoints of the tube by the cap size in both directions */
@@ -179,12 +179,12 @@ CGLDrawHelper::DrawTube_INT(int faces, BOOL smooth, BOOL caps_p, BOOL wire)
         glFrontFace(z == 0 ? GL_CCW : GL_CW);
         glNormal3f(0.0f, (z == 0 ? -1.0f : 1.0f), 0.0f);
         glBegin(wire ? GL_LINE_LOOP : GL_TRIANGLE_FAN);
-        if (! wire) glVertex3f(0.0f, z, 0.0f);
+        if (! wire) glVertex3f(0.0f, (GLfloat)z, 0.0f);
         for (i = 0, th = 0; i <= faces; i++)
           {
             GLfloat x = cos (th);
             GLfloat y = sin (th);
-            glVertex3f(x, z, y);
+            glVertex3f(x, (GLfloat)z, y);
             th += step;
           }
         glEnd();
@@ -248,7 +248,7 @@ void CGLDrawHelper::DrawLabel(GLuint font_base, GLfloat x, GLfloat y, GLfloat z,
             -mc->xfont1->descent,
             NULL);*/
 
-  for (int j = 0; j < _tcslen(label); j++)
+  for (unsigned int j = 0; j < _tcslen(label); j++)
     glCallList (font_base + (int)(label[j]));
 
   glPopMatrix();
@@ -268,7 +268,7 @@ void CGLDrawHelper::DrawString(GLuint font_base, int window_width,
 	LPTSTR copyptr = copy.get();
 	_tcsncpy_s(copyptr, copy_len+1, string, copy_len);
 	TCHAR delims[] = _T("\r\n|");
-	int y_pos = y;
+	int y_pos = (int)y;
 	TCHAR *context;
 
   glPushAttrib (GL_TRANSFORM_BIT |  /* for matrix contents */
@@ -291,7 +291,7 @@ void CGLDrawHelper::DrawString(GLuint font_base, int window_width,
 				int strings = 0;
 				while(sp != NULL)
 				{
-					glRasterPos2f(x, y_pos);
+					glRasterPos2f(x, (GLfloat)y_pos);
 					int len = _tcslen(sp);
 					glPushAttrib(GL_LIST_BIT);
 					glListBase(font_base);

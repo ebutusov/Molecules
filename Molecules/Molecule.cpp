@@ -122,7 +122,7 @@ CMolecule::GetAtomsCount()
 GLfloat
 CMolecule::GetMaxDimension()
 {
-	return m_Scale;
+	return m_maxSize + m_maxAtomSize/2.0f;
 }
 
 void
@@ -220,6 +220,8 @@ CMolecule::RescaleAtoms()
 	GLfloat max_atom, min_atom;
 	CAtom::SizeLimits(max_atom, min_atom);
 
+	m_maxAtomSize = max_atom;
+
 	FOREACH_ATOM(atom)
 		GLfloat bot = 0.4f;
     GLfloat top = 0.6f;
@@ -316,6 +318,7 @@ CMolecule::CalculateBoundingBox()
   }
 
   firstAtom->GetCoords(x1, y1, z1);
+	x2 = x1, y2 = y1, z2 = z1;
   
 	FOREACH_ATOM(atom)
 		if(atom->GetX() < x1) x1 = atom->GetX();
@@ -333,12 +336,15 @@ CMolecule::CalculateBoundingBox()
 
 	GLfloat size = m_Width > m_Height ? m_Width : m_Height;
 	size = size > m_Depth ? size : m_Depth;
-	m_Scale = size;	
+	m_maxSize = size;	
 
+	// XXX not sure what's going on here - translations were relative
+	// to the molecule, changed that to global, works better
+	// (to avoid 'dipping' into ground in reflection mode)
 	// center around the origin (all axes positive, so we need -)
-	TRANSLATIONS[0] = -(x1+m_Width/2);	// X translation
-	TRANSLATIONS[1] = -(y1+m_Height/2);	// Y translation
-	TRANSLATIONS[2] = -(z1+m_Depth/2);	// Z translation
+	TRANSLATIONS[0] = -(0+m_Width/2);	// X translation
+	TRANSLATIONS[1] = -(0+m_Height/2);	// Y translation
+	TRANSLATIONS[2] = -(0+m_Depth/2);	// Z translation
 
 	// TODO: these settings should be available throught setup dialog
 	const static int scale_after_that = 10;

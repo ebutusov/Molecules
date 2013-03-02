@@ -46,7 +46,7 @@ protected:
 	CString m_Description;
 	GLfloat TRANSLATIONS[3];
 	GLfloat m_Width, m_Height, m_Depth;
-	GLfloat m_Scale, m_ElementScale;
+	GLfloat m_maxSize, m_ElementScale, m_maxAtomSize;
 	void RescaleAtoms();
 	GLuint m_dl;
 	bool m_bFromDL;
