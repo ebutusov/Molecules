@@ -514,11 +514,17 @@ void CSaverWindow::OnRender()
       glPopMatrix();
     }
 
+		// when we think in terms of global coordinate system,
 		// transformations go in reversed order, in our case:
 		// 1. correction translation is applied to center the molecule on origin
 		// 2. rotation matrix from twister is applied
 		// 3. transformation to dim/2... is applied to lift (rotated) molecule up
-		
+		//
+		// in local object's local coordinate system, they apply in straight order
+		// 3. we lift molecule up
+		// 2. we rotate around local object's origin
+		// 1. we bring molecule to the point at which looks our camera
+
 		glTranslatef(0.0f, up_offset, 0.0f);	// (3)
 		glMultMatrixf(matrix);	// (2)
 		//glRotatef(x, 1.0f, 0.0f, 0.0f);
