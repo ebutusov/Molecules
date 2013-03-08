@@ -2,9 +2,8 @@
 
 class CGLDrawHelper
 {
-private:
-	static void DrawTube_INT(int faces, bool smooth, bool caps_p, bool wire);
 public:
+	static void DrawTubeRaw(int faces, bool smooth, bool caps_p, bool wire);
 	static void DrawSphere(int stacks, int slices, bool wire);
 
 	static void DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,

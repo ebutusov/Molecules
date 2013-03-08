@@ -204,6 +204,8 @@ void CSaverWindow::OnInit()
 
 bool CSaverWindow::LoadMolecule()
 {
+	// we need gl context for proper molecule init and destruction (call lists)
+	CGLContext ctx(m_hWnd, m_hRC);
 	CFile file;
 	std::unique_ptr<TCHAR> dir(::_tgetcwd(NULL, 0));
 	bool ok = FALSE;
@@ -236,7 +238,6 @@ bool CSaverWindow::LoadMolecule()
 		m_pMolecule->EnableLinks(m_Settings.bShowLinks);
 		m_pMolecule->EnableLabels(m_Settings.bShowLabels && !m_bScreenTooSmall);
 		m_pMolecule->EnableWire(m_Settings.bWire);
-		m_pMolecule->GenerateFormula();
 		m_pMolecule->SetFontList(m_font_base);
 		if(m_Settings.bAnimateBuild)
 			m_pMolecule->InitImplosion(2.0f);

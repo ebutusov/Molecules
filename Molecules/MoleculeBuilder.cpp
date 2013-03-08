@@ -84,7 +84,7 @@ void CMoleculeBuilder::BuildMolecule(CMolecule *mol, TCHAR *filebuf)
 		ParseLine(lineBuff.get(), mol);
 		sp = _tcstok_s(NULL, delims, &context);
 	}
-	mol->CalculateBoundingBox();
+	mol->Prepare();
 }
 
 void CMoleculeBuilder::ParseLine(TCHAR *line, CMolecule *mol)

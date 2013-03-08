@@ -76,8 +76,9 @@ GLfloat CMolecule::LINKCOLOR[4] = { 0.3f, 0.3f, 0.2f, 1.0f };
 
 CMolecule::CMolecule(void) 
 	: m_Description(_T("UNKNOWN")),
-	m_bDrawLabels(FALSE), m_bWireMode(FALSE), m_DrawMode(dmNormal),
-	m_dl(0), m_bFromDL(FALSE), m_font_base(0), m_selected_atom(-1)
+	m_bDrawLabels(false), m_bWireMode(FALSE), m_DrawMode(dmNormal),
+	m_dl(0), m_bFromDL(false), m_font_base(0), m_selected_atom(-1),
+	m_bListsReady(false)
 {
 }
 
@@ -94,6 +95,14 @@ CMolecule::~CMolecule(void)
 		delete (*i);
 
 	m_AtomLinks.clear();
+
+	if (m_bFromDL)
+		glDeleteLists(m_dl, 1);
+	if (m_bListsReady)
+	{
+		glDeleteLists(m_sphere_list, 1);
+		glDeleteLists(m_cylinder_list, 1);
+	}
 }
 
 void
@@ -152,8 +161,10 @@ void CMolecule::SetFontList(GLuint list)
 
 void CMolecule::SetSelected(int num)
 {
+	if (m_selected_atom != num)
+		m_bFromDL = false;
+
 	m_selected_atom = num;
-	m_bFromDL = false;
 }
 
 void
@@ -342,9 +353,9 @@ CMolecule::CalculateBoundingBox()
 	// to the molecule, changed that to global, works better
 	// (to avoid 'dipping' into ground in reflection mode)
 	// center around the origin (all axes positive, so we need -)
-	TRANSLATIONS[0] = -(0+m_Width/2);	// X translation
-	TRANSLATIONS[1] = -(0+m_Height/2);	// Y translation
-	TRANSLATIONS[2] = -(0+m_Depth/2);	// Z translation
+	TRANSLATIONS[0] = -(x1+m_Width/2);	// X translation
+	TRANSLATIONS[1] = -(y1+m_Height/2);	// Y translation
+	TRANSLATIONS[2] = -(z1+m_Depth/2);	// Z translation
 
 	// TODO: these settings should be available throught setup dialog
 	const static int scale_after_that = 10;
@@ -502,6 +513,45 @@ void CMolecule::GenerateFormula()
 	}
 }
 
+void CMolecule::Prepare()
+{
+	ASSERT_CONTEXT
+
+	GenerateFormula();
+	CalculateBoundingBox();
+	MakeLists();
+}
+
+void CMolecule::MakeLists()
+{
+	// sphere for atoms
+	m_sphere_list = glGenLists(1);
+	glNewList(m_sphere_list, GL_COMPILE);
+#ifdef USE_GLU
+	GLUquadric *q = gluNewQuadric();
+	gluQuadricDrawStyle(q, m_bWireMode ? GLU_LINE : GLU_FILL);
+	gluSphere(q, 1.0f, (int)(12*m_ElementScale), (int)(24*m_ElementScale));
+	gluDeleteQuadric(q);
+#else
+	CGLDrawHelper::DrawSphere((int)(12*m_ElementScale),(int)(24*m_ElementScale), m_bWireMode);
+#endif
+	glEndList();
+
+	// cylinder for bonds
+	m_cylinder_list = glGenLists(1);
+	glNewList(m_cylinder_list, GL_COMPILE);
+#ifdef USE_GLU
+	GLUquadric *q2 = gluNewQuadric();
+	gluQuadricDrawStyle(q2, m_bWireMode ? GLU_LINE : GLU_FILL);
+	gluCylinder(q2, 1.0f, 1.0f, 1.0f, 12*m_ElementScale, 24*m_ElementScale); 
+	gluDeleteQuadric(q2);
+#else
+	CGLDrawHelper::DrawTubeRaw(30, true, false, m_bWireMode);
+#endif
+	glEndList();
+	m_bListsReady = true;
+}
+
 void CMolecule::DrawLabels()
 {
 	FOREACH_ATOM(atom)
@@ -536,7 +586,12 @@ CMolecule::DrawAtoms()
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
 		glLoadName(_num);
-		DrawSphereM(x, y, z, size, m_bWireMode, m_ElementScale);
+		glPushMatrix();
+			glTranslatef(x, y, z);
+			glScalef(size, size, size);
+			glCallList(m_sphere_list);
+		glPopMatrix();
+		//DrawSphereM(x, y, z, size, m_bWireMode, m_ElementScale);
 	END_FA
 }
 
@@ -562,8 +617,42 @@ CMolecule::DrawLinks()
 		if(toAtom && fromAtom)
 		{
 			// ok, we have them both, draw the link
-			DrawTubeM(fromAtom->GetX(), fromAtom->GetY(), fromAtom->GetZ(),
-				toAtom->GetX(), toAtom->GetY(), toAtom->GetZ(), link->strength*0.1f, m_bWireMode, m_ElementScale);
+			// XXX precalculate link values (diameter, length, offsets)
+
+			GLfloat x1 = fromAtom->GetX(), y1 = fromAtom->GetY(), z1 = fromAtom->GetZ(),
+				x2 = toAtom->GetX(), y2 = toAtom->GetY(), z2 = toAtom->GetZ();
+			GLfloat X,Y,Z;
+			GLfloat length, diameter = link->strength*0.1f;
+
+			if (diameter <= 0) diameter = 0.1f;
+
+			X = (x2 - x1);
+			Y = (y2 - y1);
+			Z = (z2 - z1);
+
+			if (X == 0 && Y == 0 && Z == 0)
+				return;
+
+			length = sqrt (X*X + Y*Y + Z*Z);
+
+			glPushMatrix();
+#ifdef USE_GLU
+				// z-aligned
+				glTranslatef(x1, y1, z1);
+				glRotatef(atan2(X, Z) * (180/M_PI), 0, 1, 0);
+				glRotatef(-atan2(Y, sqrt(X*X+Z*Z)) * (180/M_PI), 1, 0, 0);
+				glScalef (diameter, diameter, length);
+#else
+				// y-aligned
+				glTranslatef(x1, y1, z1);
+				glRotatef (-atan2 (X, Y)               * (GLfloat)(180.0f / M_PI), 0, 0, 1);
+				glRotatef ( atan2 (Z, sqrt(X*X + Y*Y)) * (GLfloat)(180.0f / M_PI), 1, 0, 0);
+				glScalef (diameter, length, diameter);
+#endif
+				glCallList(m_cylinder_list);
+			glPopMatrix();
+			/*DrawTubeM(fromAtom->GetX(), fromAtom->GetY(), fromAtom->GetZ(),
+				toAtom->GetX(), toAtom->GetY(), toAtom->GetZ(), link->strength*0.1f, m_bWireMode, m_ElementScale);*/
 		}
 	}
 }
@@ -573,7 +662,7 @@ CMolecule::Draw()
 {
 	if (m_Atoms.size() == 0)
 		return;
-
+	
 	if(m_DrawMode == dmNormal)
 	{
 		if(!m_bFromDL)
@@ -585,7 +674,7 @@ CMolecule::Draw()
 			if(m_bDrawLinks)
 				DrawLinks();
 			glEndList();
-			m_bFromDL = TRUE;
+			m_bFromDL = true;
 			glCallList(m_dl);
 		}
 		else
@@ -597,7 +686,7 @@ CMolecule::Draw()
 		if(m_bFromDL)
 		{
 			glDeleteLists(m_dl, 1);
-			m_bFromDL = FALSE;
+			m_bFromDL = false;
 		}
 		DrawAtoms();
 		if (m_bDrawLabels) DrawLabels();

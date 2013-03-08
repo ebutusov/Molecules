@@ -84,7 +84,7 @@ void CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
       GLfloat diameter, GLfloat cap_size,
       int faces, bool smooth, bool caps_p, bool wire)
 {
-	 GLfloat length, X, Y, Z;
+	GLfloat length, X, Y, Z;
 
   if (diameter <= 0) abort();
 
@@ -112,12 +112,12 @@ void CGLDrawHelper::DrawTube(GLfloat x1, GLfloat y1, GLfloat z1,
     glScalef (1, 1+c+c, 1);
    }
 
-	CGLDrawHelper::DrawTube_INT(faces, smooth, caps_p, wire);
+	CGLDrawHelper::DrawTubeRaw(faces, smooth, caps_p, wire);
   glPopMatrix(); 
 	
 } 
 
-void CGLDrawHelper::DrawTube_INT(int faces, bool smooth, bool caps_p, bool wire)
+void CGLDrawHelper::DrawTubeRaw(int faces, bool smooth, bool caps_p, bool wire)
 {
   int i;
   GLfloat step = (GLfloat)M_PI * 2.0f / faces;

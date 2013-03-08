@@ -50,6 +50,9 @@ class CGLMessageLoop : public CMessageLoop {
 
 // context helper class for functions with offline calls to opengl
 // (other that OnInit, OnRender and OnResize).
+
+#define ASSERT_CONTEXT ATLASSERT(glGetString(GL_VERSION) != nullptr);
+
 class CGLContext
 {
 private:
@@ -59,6 +62,7 @@ public:
 		: m_dc(hwnd)
 	{
 		m_dc.wglMakeCurrent(hrc);
+		ASSERT_CONTEXT
 	}
 	
 	~CGLContext()
