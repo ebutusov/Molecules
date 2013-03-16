@@ -78,12 +78,14 @@ CMolecule::CMolecule(void)
 	: m_Description(_T("UNKNOWN")),
 	m_bDrawLabels(false), m_bWireMode(FALSE), m_DrawMode(dmNormal),
 	m_dl(0), m_bFromDL(false), m_font_base(0), m_selected_atom(-1),
-	m_bListsReady(false)
+	m_sphere_list(0), m_cylinder_list(0)
 {
 }
 
 CMolecule::~CMolecule(void)
 {
+	ASSERT_CONTEXT
+
 	FOREACH_ATOM(atom)
 		delete atom;
 		_it->second = NULL;
@@ -96,13 +98,9 @@ CMolecule::~CMolecule(void)
 
 	m_AtomLinks.clear();
 
-	if (m_bFromDL)
-		glDeleteLists(m_dl, 1);
-	if (m_bListsReady)
-	{
-		glDeleteLists(m_sphere_list, 1);
-		glDeleteLists(m_cylinder_list, 1);
-	}
+	if (m_dl) glDeleteLists(m_dl, 1);
+	if (m_sphere_list) glDeleteLists(m_sphere_list, 1);
+	if (m_cylinder_list)	glDeleteLists(m_cylinder_list, 1);
 }
 
 void
@@ -549,7 +547,12 @@ void CMolecule::MakeLists()
 	CGLDrawHelper::DrawTubeRaw(30, true, false, m_bWireMode);
 #endif
 	glEndList();
-	m_bListsReady = true;
+}
+
+void InvertColor(GLfloat (&col)[4])
+{
+	for (int i=0;i<3;++i)
+		col[i] = 1.0f - col[i];
 }
 
 void CMolecule::DrawLabels()
@@ -557,13 +560,14 @@ void CMolecule::DrawLabels()
 	FOREACH_ATOM(atom)
 		if (atom->GetSkip())
       continue;
-		GLfloat color[4];
+		GLfloat color[4]; // = {0.0f, 0.0f, 0.0f, 1.0f };
 		atom->GetColor(color);
-		//glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+		//InvertColor(color);
 		glColor3fv(color);
 		GLfloat size = m_bDrawLinks ? atom->GetScaledSize() : atom->GetSize();
 		GLfloat x, y, z;
 		atom->GetCurrentCoords(x, y, z);
+		// size * 2.0f
 		CGLDrawHelper::DrawLabel(m_font_base, x, y, z, 2.0f* size, 
 			_num == m_selected_atom ?  atom->GetFullName() : atom->GetName());
 	END_FA
@@ -686,6 +690,7 @@ CMolecule::Draw()
 		if(m_bFromDL)
 		{
 			glDeleteLists(m_dl, 1);
+			m_dl = 0;
 			m_bFromDL = false;
 		}
 		DrawAtoms();

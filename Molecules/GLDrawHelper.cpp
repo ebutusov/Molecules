@@ -245,6 +245,8 @@ void CGLDrawHelper::DrawLabel(GLuint font_base, GLfloat x, GLfloat y, GLfloat z,
             -mc->xfont1->descent,
             NULL);*/
 
+	//int l = _tcslen(label) * 18;
+	//glBitmap(0,0,0,0, -l/2, -18, NULL);
   for (unsigned int j = 0; j < _tcslen(label); j++)
     glCallList (font_base + (int)(label[j]));
 

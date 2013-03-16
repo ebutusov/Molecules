@@ -42,7 +42,6 @@ private:
 	bool m_bDrawLinks;
 	bool m_bDrawLabels;
 	bool m_bWireMode;
-	bool m_bListsReady;
 	static GLfloat LINKCOLOR[4];
 	CString m_Description;
 	GLfloat TRANSLATIONS[3];
