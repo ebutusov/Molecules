@@ -36,7 +36,7 @@ HWND CSaverWindow::Create(HWND hwndParent, bool bExitOnTouch, LPRECT lprc)
 	if(!hwndParent)
 	{
 		dwStyle = WS_POPUP;
-		dwExStyle = WS_EX_TOPMOST;
+		dwExStyle = dwExStyle | WS_EX_TOPMOST;
 		if(!lprc)
 		{
 			hwndParent = GetDesktopWindow();
