@@ -87,7 +87,7 @@ LRESULT CSaverWindow::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam
 
 LRESULT CSaverWindow::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 {
-  glDeleteLists(m_textureFloor, 1);
+	glDeleteLists(m_textureFloor, 1);
 	glDeleteLists(m_font_base, 255);
 	::PostQuitMessage(0);
 	return 0;
@@ -159,16 +159,16 @@ void CSaverWindow::OnInit()
 	// TODO: dynamic light calculation should be done here
 	static GLfloat pos[4] = {-1.0f, 0.4f, 0.9f, 0.0f}; 
 	static GLfloat amb[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  static GLfloat dif[4] = {0.5f, 0.5f, 0.5f, 1.0f};
-  static GLfloat spc[4] = {0.3f, 0.3f, 0.3f, 1.0f};
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
-  glLightfv(GL_LIGHT0, GL_AMBIENT,  amb);
-  glLightfv(GL_LIGHT0, GL_DIFFUSE,  dif);
-  //glLightfv(GL_LIGHT0, GL_SPECULAR, spc);
+	static GLfloat dif[4] = {0.5f, 0.5f, 0.5f, 1.0f};
+	static GLfloat spc[4] = {0.3f, 0.3f, 0.3f, 1.0f};
+	glLightfv(GL_LIGHT0, GL_POSITION, pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT,  amb);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,  dif);
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, spc);
 	glEnable(GL_LIGHT0);
 	glEnable(GL_LIGHTING);
 
-  ATLVERIFY(CTextureLoader::LoadTextureToList(MAKEINTRESOURCE(IDB_WATER), &m_textureFloor));
+	ATLVERIFY(CTextureLoader::LoadTextureToList(MAKEINTRESOURCE(IDB_WATER), &m_textureFloor));
 
 	// font display list
 	HFONT newFont = CreateFont(-20, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
@@ -263,7 +263,7 @@ bool CSaverWindow::RunSaver()
 
 	m_Twister.Init(m_Settings.fMaxSpeed);
 	bool ret = true;
-  if(m_pMolecule)
+	if(m_pMolecule)
 	{
 		SetTimer(TIMER_FPS, 1000);
 		SetTimer(TIMER_MOVE, 1);
@@ -274,11 +274,11 @@ bool CSaverWindow::RunSaver()
 		ret = FALSE;
 	}
 
-  if (m_Settings.bReflection)
-    m_fZoom = 0.0f;
+	if (m_Settings.bReflection)
+		m_fZoom = 0.0f;
 	m_dLastMove = TICK();
-  RedrawWindow();
-  return ret;
+	RedrawWindow();
+	return ret;
 }
 
 LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHandled)
@@ -348,27 +348,27 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 			if (m_Settings.bShowLabels && !m_bScreenTooSmall)
 				m_pMolecule->EnableLabels(fabs(m_fZoom - zoom_distance) < 10.0f); 
 
-      if (m_Settings.bReflection)
-      {
-        // when reflection is enabled, we only do a zoom correction here
-        // because new molecule may have different size
-        if (fabs(fabs(m_fZoom) - fabs(zoom_distance)) > 1.0f)
-        {
+			if (m_Settings.bReflection)
+			{
+				// when reflection is enabled, we only do a zoom correction here
+				// because new molecule may have different size
+				if (fabs(fabs(m_fZoom) - fabs(zoom_distance)) > 1.0f)
+				{
 					// was 0.2f
-          if (m_fZoom < zoom_distance)
-            m_fZoom += z_rate;
-          else
-            m_fZoom -= z_rate;
-        }
+					if (m_fZoom < zoom_distance)
+						m_fZoom += z_rate;
+					else
+						m_fZoom -= z_rate;
+				}
 				else
 					m_fZoom = zoom_distance;
-      }
-      else
+			}
+			else
 			{
-        m_fZoom += z_rate;
+				m_fZoom += z_rate;
 				if(m_fZoom > zoom_distance)
 					m_fZoom = zoom_distance;
-      }
+			}
 			if(m_Settings.bAnimateBuild )
 			{
 				// make sure we've reached zoom_distance before state switch
@@ -383,20 +383,20 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 				m_fZoom = -10.0f;
 			else
 			{
-        if (m_Settings.bReflection)
-        {
-          // this is really a zoom-in to the center, it allows atoms to run out of
-          // visible area
-          BOOL ready = TRUE;
-          if (m_fZoom < 0.0f)
-            m_fZoom += zo_rate;
-          if(m_Settings.bAnimateBuild)
+				if (m_Settings.bReflection)
+				{
+					// this is really a zoom-in to the center, it allows atoms to run out of
+					// visible area
+					BOOL ready = TRUE;
+					if (m_fZoom < 0.0f)
+						m_fZoom += zo_rate;
+					if(m_Settings.bAnimateBuild)
 						ready = m_pMolecule->DoImpExplode(dsec) && fabs(m_fZoom) < 3.0f;
-          if (ready)
-            LoadMolecule();
-        }
-        else
-        {
+					if (ready)
+						LoadMolecule();
+				}
+				else
+				{
 					m_fZoom -= zo_rate;
 					bool ready = FALSE;
 					if(m_Settings.bAnimateBuild)
@@ -406,7 +406,7 @@ LRESULT CSaverWindow::OnTimer(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& bHa
 						m_fZoom = -100.0f;
 						LoadMolecule();
 					}
-        }
+				}
 			}
 		}
 		m_dFrameTime = TICK() - tick;		
@@ -426,70 +426,70 @@ void CSaverWindow::UpdateFloor(DWORD delta)
 // TODO: promote floor to separate class
 void CSaverWindow::DrawFloor()
 {
-  glEnable(GL_TEXTURE_2D);
-  // draw floor (the mirror)
-  GLfloat color[4] = { 0.3f, 0.2f, 0.5f, 0.3f };
-  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
-  //glTranslatef(0.0f, 0.0f, 0.0f);
-  GLfloat d = 100.0f;
-  //glTranslatef(0.0f, 0.0f, 10.0f*sinf(TICK()));
-  glRotatef(m_fFloorPos, 0.0f, 1.0f, 0.0f);
-  glCallList(m_textureFloor);
-  glBegin(GL_QUADS);
-    glNormal3f(0,1.0f,0);
-    glTexCoord2f(1.0f, 1.0f); glVertex3f(d, 0.0f ,-d);
-    glTexCoord2f(0.0f, 1.0f); glVertex3f(-d, 0.0f, -d);
-    glTexCoord2f(0.0f, 0.0f); glVertex3f(-d, 0.0f, d);
-    glTexCoord2f(1.0f, 0.0f); glVertex3f(d, 0.0f, d);
-  glEnd();
-  glDisable(GL_TEXTURE_2D);
+	glEnable(GL_TEXTURE_2D);
+	// draw floor (the mirror)
+	GLfloat color[4] = { 0.3f, 0.2f, 0.5f, 0.3f };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
+	//glTranslatef(0.0f, 0.0f, 0.0f);
+	GLfloat d = 100.0f;
+	//glTranslatef(0.0f, 0.0f, 10.0f*sinf(TICK()));
+	glRotatef(m_fFloorPos, 0.0f, 1.0f, 0.0f);
+	glCallList(m_textureFloor);
+	glBegin(GL_QUADS);
+		glNormal3f(0,1.0f,0);
+		glTexCoord2f(1.0f, 1.0f); glVertex3f(d, 0.0f ,-d);
+		glTexCoord2f(0.0f, 1.0f); glVertex3f(-d, 0.0f, -d);
+		glTexCoord2f(0.0f, 0.0f); glVertex3f(-d, 0.0f, d);
+		glTexCoord2f(1.0f, 0.0f); glVertex3f(d, 0.0f, d);
+	glEnd();
+	glDisable(GL_TEXTURE_2D);
 }
 
 void CSaverWindow::OnRender()
 {
-  BOOL mirror = m_Settings.bReflection;
+	BOOL mirror = m_Settings.bReflection;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT); // Clear buffers
-  glLoadIdentity();
-  if(m_pMolecule)
+	glLoadIdentity();
+	if(m_pMolecule)
 	{
-    GLfloat zoom = mirror ? m_fZoom*2.0f : m_fZoom;
-    m_nFpsCount++;
-    GLfloat dim = m_pMolecule->GetMaxDimension();
+		GLfloat zoom = mirror ? m_fZoom*2.0f : m_fZoom;
+		m_nFpsCount++;
+		GLfloat dim = m_pMolecule->GetMaxDimension();
 		const GLfloat up_offset = dim/2.0f + 0.9f;
-    GLfloat tx, ty, tz;
-    m_pMolecule->GetTranslations(tx, ty, tz);
-	  double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
+		GLfloat tx, ty, tz;
+		m_pMolecule->GetTranslations(tx, ty, tz);
+		double eqr[] = {0.0f, -1.0f, 0.0f, 0.0f};
 		GLfloat matrix[16];
 		m_Twister.GetRotationMatrix(matrix);
 
 		// lift eye a little when showing reflected molecule
 		GLfloat eye_corr = mirror ? 2.0f : 0.0f;
-    gluLookAt(-tx, -ty + eye_corr, zoom, 0, -ty, 0, 0, 1, 0);
+		gluLookAt(-tx, -ty + eye_corr, zoom, 0, -ty, 0, 0, 1, 0);
 
-    if (mirror)
-    {
-      // draw the floor to the stencil buffer
-     /* glColorMask(0, 0, 0, 0);
-      glEnable(GL_STENCIL_TEST);
-      glStencilFunc(GL_ALWAYS, 1, 1);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-      glDisable(GL_DEPTH_TEST);
-      DrawFloor();
-      glEnable(GL_DEPTH_TEST);
-      glColorMask(1, 1, 1, 1);
-      glStencilFunc(GL_EQUAL, 1, 1);
-      glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);*/
-     
+		if (mirror)
+		{
+			// draw the floor to the stencil buffer
+		 /* glColorMask(0, 0, 0, 0);
+			glEnable(GL_STENCIL_TEST);
+			glStencilFunc(GL_ALWAYS, 1, 1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+			glDisable(GL_DEPTH_TEST);
+			DrawFloor();
+			glEnable(GL_DEPTH_TEST);
+			glColorMask(1, 1, 1, 1);
+			glStencilFunc(GL_EQUAL, 1, 1);
+			glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);*/
+		 
 			// draw reflected molecule
-     
-      glEnable(GL_CLIP_PLANE0);
-      glClipPlane(GL_CLIP_PLANE0, eqr);
-      glPushMatrix();
-        glScalef(1.0f, -1.0, 1.0f); // scale y axis  
-        glTranslatef(0.0f, up_offset, 0.0f);
+		 
+			glEnable(GL_CLIP_PLANE0);
+			glClipPlane(GL_CLIP_PLANE0, eqr);
+			glPushMatrix();
+				glScalef(1.0f, -1.0, 1.0f); // scale y axis  
+				glTranslatef(0.0f, up_offset, 0.0f);
 				glMultMatrixf(matrix);
-	      glTranslatef(tx, ty, tz);
-        if (m_Settings.bShowLabels && !m_bScreenTooSmall)
+				glTranslatef(tx, ty, tz);
+				if (m_Settings.bShowLabels && !m_bScreenTooSmall)
 				{
 					// don't draw labels in reflected molecule
 					m_pMolecule->EnableLabels(false);
@@ -498,22 +498,22 @@ void CSaverWindow::OnRender()
 				}
 				else
 					m_pMolecule->Draw();
-      glPopMatrix();
-      glDisable(GL_CLIP_PLANE0);
-      glDisable(GL_STENCIL_TEST);
-   
-      // the real floor
-      glPushMatrix();
-      //glLoadIdentity();
-      glEnable(GL_BLEND);
-      glDisable(GL_LIGHTING);
-        glColor4f(0.2f, 0.4f, 1.0f, 0.7f);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        DrawFloor();
-      glEnable(GL_LIGHTING);
-      glDisable(GL_BLEND);
-      glPopMatrix();
-    }
+			glPopMatrix();
+			glDisable(GL_CLIP_PLANE0);
+			glDisable(GL_STENCIL_TEST);
+	 
+			// the real floor
+			glPushMatrix();
+			//glLoadIdentity();
+			glEnable(GL_BLEND);
+			glDisable(GL_LIGHTING);
+				glColor4f(0.2f, 0.4f, 1.0f, 0.7f);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				DrawFloor();
+			glEnable(GL_LIGHTING);
+			glDisable(GL_BLEND);
+			glPopMatrix();
+		}
 
 		// when we think in terms of global coordinate system,
 		// transformations go in reversed order, in our case:
@@ -532,7 +532,7 @@ void CSaverWindow::OnRender()
 		//glRotatef(y, 0.0f, 1.0f, 0.0f);	
 		//glRotatef(z, 0.0f, 0.0f, 1.0f);
 		glTranslatef(tx, ty, tz); // (1) 
-    
+		
 		m_pMolecule->Draw();
 
 		glColor3f(0.1f, 1.0f, 0.2f);
@@ -600,5 +600,5 @@ void CSaverWindow::OnResize(int cx, int cy)
 
 void CSaverWindow::LoadPreferences()
 {
-  m_Settings.Load();
+	m_Settings.Load();
 }
